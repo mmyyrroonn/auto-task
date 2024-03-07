@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
 import requests
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import pyautogui  #<== need this to click on extension
 from basic_operator import click,fetch_content,input_content,clear_windows_and_resize
 from data_manager import load_users_list
@@ -19,7 +19,11 @@ from tasks import (bera_drip, import_discord,
                    import_twitter, follow_users,
                    import_unisat, well3_daily, qna3_daily,
                    daily_bera_galxe_point, well3_daily_mint,
-                   nfp_daily_check)
+                   nfp_daily_check, test_daily, keplr_import,
+                   okx_wallet_import)
+import random
+from datetime import datetime
+from tinydb import TinyDB, Query
 
 # 加载 .env 文件
 load_dotenv()
@@ -72,10 +76,21 @@ class AdsPowerChromeDriver:
 class Executor:
     def __init__(self) -> None:
         self.users_list = load_users_list()
+        self.history = TinyDB('history.json')
         pass
+    
+    def get_today_datestring(self):
+        # Get today's date
+        today = datetime.now()
+        
+        # Format the date as a string in the format 'YYYY-MM-DD'
+        date_string = today.strftime('%Y-%m-%d')
+        
+        return date_string
 
-    def run_once(self, task_func, user, *args, **kwargs):
+    def run_once(self, task_func, user, option, *args, **kwargs):
         chrome = AdsPowerChromeDriver(user['user_id'])
+        result = False
         try:
             chrome.start()
             print(chrome.selemium)
@@ -84,41 +99,133 @@ class Executor:
             time.sleep(1)
             clear_windows_and_resize(driver)
             time.sleep(0.5)
-            task_func(driver, user, *args, **kwargs)
+            result = task_func(driver, user, option, *args, **kwargs)
             time.sleep(2)
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
             chrome.close()
+        return result
 
-    def sequence_run_tasks(self, task_func, start_user_index=0, *args, **kwargs):
+    def sequence_run_tasks(self, task_func, option=None, start_user_index=0, *args, **kwargs):
         users = self.users_list[start_user_index:]
         for user in users:
-            self.run_once(task_func, user, *args, **kwargs)
+            self.run_once(task_func, user, option, *args, **kwargs)
 
-    def batch_run_tasks(self, task_func, start_user_index=0, max_count = 5, *args, **kwargs):
+    def batch_run_tasks(self, task_func, option=None, start_user_index=0, max_count=5, *args, **kwargs):
         users = self.users_list[start_user_index:]
-        pool = ThreadPoolExecutor(max_workers=max_count)
+        with ThreadPoolExecutor(max_workers=max_count) as pool:
+            # Dictionary to keep track of which user each future is processing
+            future_to_user = {}
 
-        # 提交任务到线程池
-        futures = []
-        count = 0
-        for user in users:
-            future = pool.submit(self.run_once, task_func, user, *args, **kwargs)
-            time.sleep(2)
-            futures.append(future)
-            count += 1
-            if(count == max_count):
-                for future in futures:
-                    future.result()
-                count = 0
-                futures = []
+            # Submit initial batch of tasks
+            for user in users[:max_count]:
+                future = pool.submit(self.run_once, task_func, user, option, *args, **kwargs)
+                time.sleep(1)
+                future_to_user[future] = user
 
-        for future in futures:
-            future.result()
+            # Process remaining users
+            for user in users[max_count:]:
+                # Wait for the next future to complete before submitting a new one
+                done_future = next(as_completed(future_to_user))
+                done_future.result()  # You may handle results or exceptions here
 
-        # 关闭线程池
-        pool.shutdown()
+                time.sleep(1)
+                # Submit a new task to the pool
+                future = pool.submit(self.run_once, task_func, user, option, *args, **kwargs)
+                future_to_user[future] = user
+
+                # Remove the completed future from the dictionary
+                del future_to_user[done_future]
+
+            # Wait for the remaining futures to complete
+            for future in as_completed(future_to_user):
+                future.result()  # Again, handle results or exceptions if necessary
+
+    def random_run_all_tasks(self, task_func_with_option_list, max_count=5, *args, **kwargs):
+        tasks = self.build_task_list(task_func_with_option_list)
+        with ThreadPoolExecutor(max_workers=max_count) as pool:
+            # Dictionary to keep track of which user each future is processing
+            future_to_task = {}
+
+            # Submit initial batch of tasks
+            for task in tasks[:max_count]:
+                future = pool.submit(self.run_once, task["func"], task["user"], task["option"], *args, **kwargs)
+                time.sleep(1)
+                future_to_task[future] = task
+
+            # Process remaining users
+            for task in tasks[max_count:]:
+                # Wait for the next future to complete before submitting a new one
+                done_future = next(as_completed(future_to_task))
+                self.handle_result(done_future.result(), future_to_task[done_future])
+                time.sleep(1)
+                # Submit a new task to the pool
+                future = pool.submit(self.run_once, task["func"], task["user"], task["option"], *args, **kwargs)
+                future_to_task[future] = task
+
+                # Remove the completed future from the dictionary
+                del future_to_task[done_future]
+
+            # Wait for the remaining futures to complete
+            for future in as_completed(future_to_task):
+                self.handle_result(future.result(), future_to_task[future])
+    
+    def build_task_list(self, task_func_with_option_list, disable_history=False):
+        datestring = self.get_today_datestring()
+        tasks = []
+        for user in self.users_list:
+            for (task_func, option) in task_func_with_option_list:
+                if disable_history or not self.is_task_completed(datestring, user["user_id"], task_func.__name__):
+                    tasks.append({"date": datestring, "func": task_func, "user": user, "option": option})
+        random.shuffle(tasks)
+        print("Total tasks count is {}".format(len(tasks)))
+        return tasks
+    
+    def handle_result(self, result, task):
+        """
+        Store or update the task completion result in the database.
+        If an identical task entry exists, it updates that entry.
+        Otherwise, it inserts a new entry into the database.
+        """
+        TaskQuery = Query()
+        # Search for an existing task with the same date, user_id, and func_name
+        search_result = self.history.search(
+            (TaskQuery.date == task["date"]) & 
+            (TaskQuery.user_id == task["user"]["user_id"]) & 
+            (TaskQuery.func_name == task["func"].__name__)
+        )
+        
+        # Data to be inserted or updated
+        task_data = {
+            'date': task["date"],
+            'user_id': task["user"]["user_id"],
+            'func_name': task["func"].__name__,
+            'completed': result
+        }
+        
+        if search_result:
+            # Update the existing task with the new result and increment the 'tries' count
+            existing_doc_id = search_result[0].doc_id
+            current_tries = search_result[0].get('tries', 1)  # Default to 1 if 'tries' does not exist
+            self.history.update(task_data | {'tries': current_tries + 1}, doc_ids=[existing_doc_id])
+        else:
+            # Insert a new task entry with 'tries' initialized to 1
+            self.history.insert(task_data | {'tries': 1})
+    
+    def is_task_completed(self, datestring, user_id, task_name):
+        TaskQuery = Query()
+        # Search for an existing task with the same date, user_id, and func_name
+        search_result = self.history.search(
+            (TaskQuery.date == datestring) & 
+            (TaskQuery.user_id == user_id) & 
+            (TaskQuery.func_name == task_name)
+        )
+        
+        if search_result:
+            completed = search_result[0].get('completed', True)  # Default to 1 if 'tries' does not exist
+            return completed
+        return False
 
 def sequence_follow_twitter():
     users_list = load_users_list()
@@ -136,14 +243,21 @@ def sequence_follow_twitter():
         time.sleep(0.5)
         # Randomly selecting 20 unique user_ids (or fewer if there aren't enough)
         following = random.sample(user_ids, min(len(user_ids), 20))
-        follow_users(driver, user, following)
+        follow_users(driver, user, {"following": following})
         chrome.close()
 
 
 executor = Executor()
-executor.batch_run_tasks(daily_bera_galxe_point, 0, 5, password)
-executor.batch_run_tasks(well3_daily_mint, 0, 2, password)
-executor.batch_run_tasks(bera_drip)
-executor.batch_run_tasks(qna3_daily, 0, 5, password)
-executor.batch_run_tasks(nfp_daily_check, 0, 3, password)
-executor.batch_run_tasks(well3_daily)
+# executor.sequence_run_tasks(daily_bera_galxe_point, {"password": password}, 9)
+
+# executor.batch_run_tasks(daily_bera_galxe_point, {"password": password}, 0, 5)
+# executor.batch_run_tasks(well3_daily_mint, {"password": password}, 0, 2)
+# executor.batch_run_tasks(qna3_daily, {"password": password}, 0, 5)
+# executor.batch_run_tasks(nfp_daily_check, {"password": password}, 0, 3)
+# executor.batch_run_tasks(well3_daily)
+
+task_func_with_option_list = [(daily_bera_galxe_point, {"password": password}),
+                              (well3_daily_mint, {"password": password}),
+                              (nfp_daily_check, {"password": password}),
+                              (well3_daily, None)]
+executor.random_run_all_tasks(task_func_with_option_list)

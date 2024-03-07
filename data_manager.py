@@ -13,12 +13,14 @@ def load_users_list():
                         twitter_info = twitter.readline()
                         address_info = addresses.readline().rstrip()
                         mnemonic = open("../evm-metamask-seeds-using/{}.json".format(index), "r").readline().split(' ')
+                        dym = open("../dym/{}.json".format(index+1), "r").readline().split(' ')
                         users_list.append({"user_id": user_id,
                                            "name": int(name),
                                            "discord": discord_info,
                                            "twitter": twitter_info,
                                            "address": address_info,
-                                           "mnemonic": mnemonic})
+                                           "mnemonic": mnemonic,
+                                           "dym": dym})
     print("Load user id list")
     print(users_list)
     return users_list
