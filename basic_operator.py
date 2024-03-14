@@ -15,14 +15,18 @@ import time
 
 def click(driver, xpath):
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
+    time.sleep(0.5)
     
 def fetch_content(driver, xpath):
-    return WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath))).text
+    text = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath))).text
+    time.sleep(0.5)
+    return text
 
 def input_content(driver, xpath, content):
     input_content = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
     input_content.clear()
     input_content.send_keys(content)
+    time.sleep(0.5)
 
 def clear_windows_and_resize(driver):
     all_windows = driver.window_handles
@@ -35,6 +39,7 @@ def clear_windows_and_resize(driver):
 
     # 修改窗口大小，例如设置宽度为1024px，高度为768px
     driver.set_window_size(1980, 1280)
+    time.sleep(0.5)
 
 def switch_to_metamask(driver, max_wait_time=15):
     end_time = time.time() + max_wait_time
@@ -104,6 +109,7 @@ def metamask_notification_check(driver):
     return metamask_found
 
 def metamask_click(driver, xpaths: [str], max_wait_time: int) -> bool:
+    time.sleep(2) # wait for the tab
     end_time = time.time() + max_wait_time
     consecutive_closures = 0  # Counter for consecutive driver closures
 
@@ -150,3 +156,23 @@ def input_password_and_unlock(driver, password):
     input_content(driver, "/html/body/div[1]/div/div/div/div/form/div/div/input", password)
     time.sleep(0.5)
     click(driver, "/html/body/div[1]/div/div/div/div/button") # unlock
+
+def fetch_value(driver, xpath, max_wait_time=5):
+    end_time = time.time() + max_wait_time
+    while True:
+        try:
+            # Find the element using the provided XPath
+            element = driver.find_element('xpath', xpath)
+            # If the element's text matches the expected content, return True
+            return element.text
+        except NoSuchElementException:
+            # If the element is not found, we'll wait and retry
+            pass
+        
+        # Check if the timeout has been reached
+        if time.time() > end_time:
+            break
+        
+        # Wait for 1 second before trying again
+        time.sleep(1)
+    time.sleep(0.5)

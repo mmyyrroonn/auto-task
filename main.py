@@ -20,7 +20,8 @@ from tasks import (bera_drip, import_discord,
                    import_unisat, well3_daily, qna3_daily,
                    daily_bera_galxe_point, well3_daily_mint,
                    nfp_daily_check, test_daily, keplr_import,
-                   okx_wallet_import)
+                   okx_wallet_import, well3_daily_ai_mint,
+                   ultiverse_daily_explore)
 import random
 from datetime import datetime
 from tinydb import TinyDB, Query
@@ -248,9 +249,9 @@ def sequence_follow_twitter():
 
 
 executor = Executor()
-# executor.sequence_run_tasks(daily_bera_galxe_point, {"password": password}, 9)
+# executor.sequence_run_tasks(ultiverse_daily_explore, {"password": password}, 3)
 
-# executor.batch_run_tasks(daily_bera_galxe_point, {"password": password}, 0, 5)
+# executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
 # executor.batch_run_tasks(well3_daily_mint, {"password": password}, 0, 2)
 # executor.batch_run_tasks(qna3_daily, {"password": password}, 0, 5)
 # executor.batch_run_tasks(nfp_daily_check, {"password": password}, 0, 3)
@@ -259,5 +260,7 @@ executor = Executor()
 task_func_with_option_list = [(daily_bera_galxe_point, {"password": password}),
                               (well3_daily_mint, {"password": password}),
                               (nfp_daily_check, {"password": password}),
+                              (well3_daily_ai_mint, {"password": password}),
+                              (ultiverse_daily_explore, {"password": password}),
                               (well3_daily, None)]
 executor.random_run_all_tasks(task_func_with_option_list)
