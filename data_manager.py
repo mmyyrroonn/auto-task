@@ -5,7 +5,7 @@ def load_users_list():
             with open("../twitter-accounts.txt", "r", encoding='utf-8') as twitter:
                 with open("../addresses.txt", "r", encoding='utf-8') as addresses:
                     for index in range(50):
-                        acc_id = file.readline().split('=')[1]
+                        acc_id = int(file.readline().split('=')[1].rstrip())
                         user_id = file.readline().split('=')[1].rstrip()
                         name = file.readline().split('=')[1]
                         file.readline()
@@ -14,7 +14,8 @@ def load_users_list():
                         address_info = addresses.readline().rstrip()
                         mnemonic = open("../evm-metamask-seeds-using/{}.json".format(index), "r").readline().split(' ')
                         dym = open("../dym/{}.json".format(index+1), "r").readline().split(' ')
-                        users_list.append({"user_id": user_id,
+                        users_list.append({"acc_id": acc_id,
+                                           "user_id": user_id,
                                            "name": int(name),
                                            "discord": discord_info,
                                            "twitter": twitter_info,

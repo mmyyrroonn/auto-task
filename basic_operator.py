@@ -12,6 +12,43 @@ from selenium.common.exceptions import (NoSuchElementException,
                                         ElementClickInterceptedException,
                                         WebDriverException)
 import time
+from logger import logger
+
+def wait_for_continue(user):
+    while True:
+        # 等待用户输入
+        user_input = input("Please enter the acc id to continue: ")
+        
+        # 尝试将输入转换为整数
+        try:
+            input_number = int(user_input)
+
+            # 判断输入的数字是否在user中
+            if input_number == user["acc_id"]:
+                print("{} back to auto work".format(input_number))
+                time.sleep(1)
+                return True
+        except ValueError:
+            # 如果输入不能转换成整数，则返回False
+            print("That's not a valid number.")
+
+def switch_to_network(driver, user, option):
+    network_id = option["network_id"]
+    password = option["password"]
+    network_url = "https://chainlist.org/chain/" + network_id
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get(network_url)
+    click(driver, "/html/body/div[1]/div/div[2]/div[2]/button")
+    switch_to_metamask(driver)
+    input_password_and_unlock(driver, password)
+    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
+                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
+                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
+                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
+                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
+                                            30)
+    driver.switch_to.window(driver.window_handles[0])
 
 def click(driver, xpath):
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
@@ -87,7 +124,7 @@ def check_element_content(driver, xpath: str, content: str, max_wait_time: int) 
 def metamask_notification_check(driver):
     all_windows = driver.window_handles
     metamask_found = False
-    print("all_windows", all_windows)
+    logger.debug("all_windows", all_windows)
     for window in all_windows:
         try:
             driver.switch_to.window(window)
@@ -114,38 +151,38 @@ def metamask_click(driver, xpaths: [str], max_wait_time: int) -> bool:
     consecutive_closures = 0  # Counter for consecutive driver closures
 
     while True:
-        print("check1")
+        logger.debug("check1")
         time.sleep(1)
         metamask_found = metamask_notification_check(driver)
         if time.time() > end_time:
             break
         time.sleep(1)
         if not metamask_found:
-            print("not found")
+            logger.debug("not found")
             consecutive_closures += 1
             if consecutive_closures >= 3:
                 return True
             continue
-        print("check3")
+        logger.debug("check3")
         for xpath in xpaths:
             try:
                 # Check if the element exists and is visible
                 element = driver.find_element('xpath', xpath)
-                print("check4")
+                logger.debug("check4")
                 consecutive_closures = 0
                 if element.is_displayed():
                     # Click on the element if it is displayed
                     element.click()
                     break
             except (NoSuchElementException, ElementClickInterceptedException):
-                print("check5")
+                logger.debug("check5")
                 continue  # If exception occurs, move to the next xpath
             except WebDriverException as e:
                 # Check if the exception is because of a closed driver
                 if 'no such window' in str(e).lower():
                     consecutive_closures += 1
                     if consecutive_closures >= 5:
-                        print("Driver has been closed consecutively 5 times. Ending function.")
+                        logger.debug("Driver has been closed consecutively 5 times. Ending function.")
                         return True
                 else:
                     # If the error is not due to a closed driver, reset the counter

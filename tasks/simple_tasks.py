@@ -9,11 +9,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
+from logger import logger
 import pyperclip
-import requests
-import threading
 import random
-from concurrent.futures import ThreadPoolExecutor
 import pyautogui  #<== need this to click on extension
 import time
 from basic_operator import (
@@ -21,26 +19,8 @@ click, fetch_value,
 fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,
-metamask_click)
+metamask_click, switch_to_network)
 #### import metamask
-
-def switch_to_network(driver, user, option):
-    network_id = option["network_id"]
-    password = option["password"]
-    network_url = "https://chainlist.org/chain/" + network_id
-    driver.switch_to.window(driver.window_handles[0])
-    time.sleep(0.5)
-    driver.get(network_url)
-    click(driver, "/html/body/div[1]/div/div[2]/div[2]/button")
-    switch_to_metamask(driver)
-    input_password_and_unlock(driver, password)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
-    driver.switch_to.window(driver.window_handles[0])
 
 def import_metamask(driver, mnemonic, password):
     driver.switch_to.window(driver.window_handles[0])
@@ -73,7 +53,7 @@ def import_metamask(driver, mnemonic, password):
     time.sleep(2)
     driver.find_element('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div[2]/button').click() # done
     time.sleep(2)
-    print('import complete')
+    logger.info('import complete')
 
 #### import twitter auth token
 
@@ -130,7 +110,7 @@ def open_discord_login_and_swith(driver):
     for handle in window_handles:
         # 切换到新窗口
         driver.switch_to.window(handle)
-        print(driver.title)
+        logger.debug(driver.title)
         # 如果确认是扩展窗口，则进行你需要的操作
         if "Discord Token" in driver.title:
             # 这里执行你想做的操作
@@ -223,7 +203,7 @@ def import_unisat(driver, user, option):
     # click(driver, "/html/body/div/div[1]/div/div[2]/div[2]/div/div/div[3]/div[4]/label/span[1]/input")
     # time.sleep(0.5)
     # click(driver, "/html/body/div/div[1]/div/div[2]/div[2]/div/div/div[4]/div") # OK
-    print("import unisat successufully")
+    logger.info("import unisat successufully")
     return True
 
 #### well3 daily check
@@ -236,7 +216,7 @@ def well3_daily(driver, _user, option):
     click(driver, "/html/body/div/div[1]/main/div[3]/div/div/button/div") # click i'm ready
     time.sleep(50)
     click(driver, "/html/body/div/div[1]/main/div[3]/div/div/button") # back to dashbord
-    print("well3 daily success")
+    logger.info("well3 daily success")
     return True
 
 #### test daily check
@@ -285,7 +265,7 @@ def qna3_daily(driver, _user, option):
     click(driver, "/html/body/div[1]/div[1]/div/div[1]/div/div[2]/div[2]/div/button/span")
     click(driver, "/html/body/div[1]/div[1]/div/div[1]/div/div[2]/div[2]/div/ul/li[1]/div") # click english
     if check_element_content(driver, "/html/body/div[1]/div[1]/div/div[2]/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div[2]", "opBNB", 10):
-        print("click to opBNB")
+        logger.debug("click to opBNB")
         click(driver, "/html/body/div[1]/div[1]/div/div[2]/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div[2]") # switch to opBNB
         metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
                                             "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
@@ -301,7 +281,7 @@ def qna3_daily(driver, _user, option):
     click(driver, "/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]") # confirm
     driver.switch_to.window(driver.window_handles[0])
     result = check_element_content(driver, "/html/body/div[1]/div[1]/div/div[2]/div/div[2]/div/div[2]/div[3]/div/a/button", "Claim Credits", 30)
-    print("qan3 daily {}".format(result))
+    logger.info("qan3 daily {}".format(result))
     return True
 
 #### daily bera
@@ -331,7 +311,7 @@ def daily_bera_galxe_point(driver, user, option):
     time.sleep(5)
     click(driver, "/html/body/div/div/div/div[3]/div[1]/main/div/div/div/div[2]/div/div[1]/div[2]/div[2]/div/div[1]/div[2]/div/div/div/div/button")
     time.sleep(5)
-    print("bera point daily get")
+    logger.info("bera point daily get")
     return True
 
 #### well3 daily check
@@ -386,7 +366,7 @@ def well3_daily_mint(driver, _user, option):
                                             "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
                                             30)
     time.sleep(2)
-    print("well3 daily mint success")
+    logger.info("well3 daily mint success")
     return True
 
 def nfp_daily_check(driver, _user, option):
@@ -395,7 +375,7 @@ def nfp_daily_check(driver, _user, option):
     time.sleep(0.5)
     driver.get("https://nfprompt.io/earn?invitecode=1bX2Jmzj")
     if check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/span", ":", 5):
-        print("nfp daily True")
+        logger.info("nfp daily True")
         return True
     if check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/button/span", "Claim", 5):
         driver.get("https://nfprompt.io/earn?invitecode=1bX2Jmzj")
@@ -416,7 +396,7 @@ def nfp_daily_check(driver, _user, option):
     time.sleep(1)
     driver.switch_to.window(driver.window_handles[0])
     if check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/span", ":", 5):
-        print("nfp daily True")
+        logger.info("nfp daily True")
         return True
     click(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/button/span")
     switch_to_metamask(driver)
@@ -424,7 +404,7 @@ def nfp_daily_check(driver, _user, option):
     time.sleep(1)
     driver.switch_to.window(driver.window_handles[0])
     result = check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/span", ":", 30)
-    print("nfp daily {}".format(result))
+    logger.info("nfp daily {}".format(result))
     return True
 
 def keplr_import(driver, user, option):
@@ -450,7 +430,7 @@ def keplr_import(driver, user, option):
     click(driver, "/html/body/div/div/div[2]/div/div/div/div/div/div[5]/div[1]/div[2]/div/div/div")
     click(driver, "/html/body/div/div/div[2]/div/div/div/div/div/div[9]/div/button")
     time.sleep(0.5)
-    print("import dym successfully")
+    logger.info("import dym successfully")
 
 def okx_wallet_import(driver, user, option):
     password = option["password"]
@@ -483,9 +463,9 @@ def okx_wallet_import(driver, user, option):
     click(driver, "/html/body/div[1]/div/div/div/div[1]/div/div/div[3]/div")
     click(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div/div[4]")
     click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div[3]/div[3]/i")
-    print(user["name"])
+    logger.debug(user["name"])
     clipboard_content = pyperclip.paste()
-    print(clipboard_content)
+    logger.debug(clipboard_content)
     return True
 
 def well3_daily_ai_mint(driver, _user, option):
@@ -542,29 +522,37 @@ def well3_daily_ai_mint(driver, _user, option):
     click(driver, "/html/body/div/div[3]/div/div/div[3]/button")
     result = check_element_content(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button", "Claim", 10)
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button")
-    print("well3 daily mint ai {}".format(result))
+    logger.info("well3 daily mint ai {}".format(result))
     return result
 
 def ultiverse_daily_explore(driver, _user, option):
+    option["network_id"] = "204"
+    switch_to_network(driver, _user, option)
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
     password = option["password"]
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://pilot.ultiverse.io")
-    time.sleep(1)
-    if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[4]/div[2]/button", "Connect", 10):
+    time.sleep(5)
+    if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[4]/div[2]/button", "Connect", 3):
         click(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[4]/div[2]/button")
-        time.sleep(0.5)
-    click(driver, "/html/body/div[1]/div/div[2]/div/div[1]/div/div[1]/div[2]/img[3]")
-    switch_to_metamask(driver)
-    input_password_and_unlock(driver, password)
-    time.sleep(2)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
+        time.sleep(1)
+        try:
+            click(driver, "/html/body/div[1]/div/div[2]/div/div[1]/div/div[1]/div[2]/img[3]")
+            time.sleep(1)
+        except:
+            pass
+        switch_to_metamask(driver)
+        # input_password_and_unlock(driver, password)
+        time.sleep(1)
+        metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
                                             "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
                                             "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
                                             "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
                                             "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
                                             30)
-    time.sleep(3)
+        time.sleep(3)
     # if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/button", "Join", 5):
     # 使用JavaScript来模拟点击
     x_coordinate = 10  # 替换为你想点击的X坐标
@@ -578,27 +566,28 @@ def ultiverse_daily_explore(driver, _user, option):
     script = f"document.elementFromPoint({x_coordinate}, {y_coordinate}).click();"
     driver.execute_script(script)
     time.sleep(0.5)
-
     time.sleep(1)
+    try:
+        if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div[2]/button", "exploring", 5):
+            logger.info("ultiverse daily explore {}".format("True"))
+            return True
+    except:
+        pass
+
     explore_count = 0
     try:
-        soul_number = fetch_value(driver, "/html/body/div[1]/div/div[1]/div/header/div[2]/div/div[1]/div/div/div/p[1]/span[2]")
+        soul_number = fetch_value(driver, "/html/body/div[1]/div/div[1]/div/header/div/div[2]/div[2]/div[2]/div/p[1]/span[2]")
         explore_count = int(int(soul_number)/50)
     except:
         pass
     time.sleep(1)
-    print("explore_count is {}".format(explore_count))
-    click(driver, "/html/body/div[1]/div/div[1]/div/div[2]/div[5]")
-    time.sleep(3)
-    if explore_count >= 5:
-        click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[4]/div[1]/div/button")
-    else:
-        click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[3]/div[1]/div/div[5]/div[2]/button/label")
+    logger.debug("explore_count is {}".format(explore_count))
+    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div/button/label")   
+    time.sleep(1)
+    for i in range(min(explore_count, 5)):
+        click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[{}]/div[5]/div/button/label".format(str(i+2)))
         time.sleep(0.5)
-        for i in range(explore_count):
-            click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[3]/div[{}]/div/div[5]/div/button".format(str(i+2)))
-            time.sleep(0.5)
-    click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[4]/div[2]/div/button")
+    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[4]/div/div[2]/button")
     click(driver, "/html/body/div[3]/div/div/div[3]/button")
     switch_to_metamask(driver)
     metamask_click(driver, ["/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]", # Check
@@ -609,8 +598,26 @@ def ultiverse_daily_explore(driver, _user, option):
     result = check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/div/div[3]/button", "Close", 50)
     if result:
         click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/div/div[3]/button")
-        print("ultiverse daily explore {}".format(result))
+        logger.info("ultiverse daily explore {}".format(result))
         return True
     return False
-
 # chrome-extension://nebnhfamliijlghikdgcigoebonmoibm/fullpage.html#/ aleo wallet
+
+def sequence_follow_twitter(driver, _user, option):
+    users_list = load_users_list()
+    user_ids = [user['twitter'].split("----")[0] for user in users_list]
+    users = users_list[4:]
+    for user in users:
+        logger.debug(user)
+        chrome = AdsPowerChromeDriver(user['user_id']) #, "127.0.0.1:5259", "C:\\Users\\myron\\AppData\\Roaming\\adspower_global\\cwd_global\\chrome_119\\chromedriver.exe")
+        chrome.start()
+        logger.debug(chrome.selemium)
+        logger.debug(chrome.driver_path)
+        driver = chrome.connect()
+        time.sleep(1)
+        clear_windows_and_resize(driver)
+        time.sleep(0.5)
+        # Randomly selecting 20 unique user_ids (or fewer if there aren't enough)
+        following = random.sample(user_ids, min(len(user_ids), 20))
+        follow_users(driver, user, {"following": following})
+        chrome.close()
