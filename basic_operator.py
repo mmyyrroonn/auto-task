@@ -32,6 +32,23 @@ def wait_for_continue(user):
             # 如果输入不能转换成整数，则返回False
             print("That's not a valid number.")
 
+def switch_to_page(driver, url, max_wait_time=120):
+    end_time = time.time() + max_wait_time
+    page_found = False
+    while True:
+        all_windows = driver.window_handles
+        for window in all_windows:
+            driver.switch_to.window(window)
+            if url in driver.current_url:
+                page_found = True
+                break
+        
+        if page_found or time.time() > end_time:
+            break
+        
+        time.sleep(1)  # Wait for 0.5 seconds before trying again
+
+
 def switch_to_network(driver, user, option):
     network_id = option["network_id"]
     password = option["password"]

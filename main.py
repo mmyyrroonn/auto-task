@@ -21,8 +21,10 @@ from tasks.simple_tasks import (bera_drip, import_discord,
                    daily_bera_galxe_point, well3_daily_mint,
                    nfp_daily_check, test_daily, keplr_import,
                    okx_wallet_import, well3_daily_ai_mint,
-                   ultiverse_daily_explore)
+                   ultiverse_daily_explore, google_login, transfer_eth_to_ok_coin)
+from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task)
 from tasks.secwarex import (init_connect_and_scan)
+from tasks.zeta_tasks import (zetahub_register)
 import random
 from datetime import datetime
 from tinydb import TinyDB, Query
@@ -144,6 +146,24 @@ class Executor:
         users = self.users_list[start_user_index:]
         for user in users:
             self.run_once(task_func, user, option, *args, **kwargs)
+    
+    def sequence_run_tasks_without_driver(self, task_func, option=None, start_user_index=0, *args, **kwargs):
+        users = self.users_list[start_user_index:]
+        for user in users:
+            self.run_once_without_driver(task_func, user, option, *args, **kwargs)
+
+    def run_once_without_driver(self, task_func, user, option, *args, **kwargs):
+        result = False
+        try:
+            result = task_func(None, user, option)
+            time.sleep(2)
+        except Exception as e:
+            logger.error("An error occurred for {} in task {}".format(user['acc_id'], task_func))
+            print(e)
+        finally:
+            logger.info("Wait for a while")
+            time.sleep(180)
+        return result
 
     def batch_run_tasks(self, task_func, option=None, start_user_index=0, max_count=5, *args, **kwargs):
         users = self.users_list[start_user_index:]
@@ -265,7 +285,7 @@ class Executor:
 
 
 executor = Executor()
-# executor.sequence_run_tasks(init_connect_and_scan, {"password": password}, 9)
+# executor.sequence_run_tasks_without_driver(transfer_eth_to_ok_coin, None, 30)
 
 # executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
 # executor.batch_run_tasks(well3_daily_mint, {"password": password}, 0, 2)
@@ -273,18 +293,17 @@ executor = Executor()
 # executor.batch_run_tasks(nfp_daily_check, {"password": password}, 0, 3)
 # executor.batch_run_tasks(well3_daily)
 
+task_func_with_option_list = [(well3_daily_mint, {"password": password}),
+                              (nfp_daily_check, {"password": password}),
+                              (well3_daily_ai_mint, {"password": password}),
+                              (ultiverse_daily_explore, {"password": password}),
+                              (well3_daily, None)]
+executor.random_run_all_tasks(task_func_with_option_list)
+
 # task_func_with_option_list = [(daily_bera_galxe_point, {"password": password}),
 #                               (well3_daily_mint, {"password": password}),
 #                               (nfp_daily_check, {"password": password}),
 #                               (well3_daily_ai_mint, {"password": password}),
 #                               (ultiverse_daily_explore, {"password": password}),
 #                               (well3_daily, None)]
-# executor.random_run_all_tasks(task_func_with_option_list, retry=2)
-
-task_func_with_option_list = [(daily_bera_galxe_point, {"password": password}),
-                              (well3_daily_mint, {"password": password}),
-                              (nfp_daily_check, {"password": password}),
-                              (well3_daily_ai_mint, {"password": password}),
-                              (ultiverse_daily_explore, {"password": password}),
-                              (well3_daily, None)]
-executor.random_run_all_tasks(task_func_with_option_list, retry=1, human=True)
+# executor.random_run_all_tasks(task_func_with_option_list, retry=1, human=True)

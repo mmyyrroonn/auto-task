@@ -14,6 +14,8 @@ import pyperclip
 import random
 import pyautogui  #<== need this to click on extension
 import time
+from web3 import Web3
+from web3.middleware import construct_sign_and_send_raw_middleware
 from basic_operator import (
 click, fetch_value,
 fetch_content,input_content,
@@ -141,19 +143,16 @@ def import_discord(driver, user, option):
 #### follow twitter users
 
 def follow_user(driver, to_follow):
-    driver.get("https://twitter.com/"+user)
+    driver.get("https://twitter.com/"+to_follow)
     # Wait for the follow button to be clickable and then click it
-    follow_button_xpath = '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div/span/span'
-    try:
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, follow_button_xpath))).click()
-    except:
-        return
+    click(driver, "/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/div/div/div[1]/div[2]/div[3]/div[1]/div/div/span/span")
     time.sleep(1)
 
-def follow_users(driver, _user, option):
+def follow_users(driver, user, option):
     following = option["following"]
     for to_follow in following:
         follow_user(driver, to_follow)
+    logger.info("follow twitter is success for {}".format(user["acc_id"]))
     return True
 
 #### berachain daily drip
@@ -211,6 +210,8 @@ def well3_daily(driver, _user, option):
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
+    time.sleep(0.5)
+    click(driver, "/html/body/div/button")
     time.sleep(0.5)
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[1]/div/div/div[5]/div[2]/button") # click start
     click(driver, "/html/body/div/div[1]/main/div[3]/div/div/button/div") # click i'm ready
@@ -286,7 +287,7 @@ def qna3_daily(driver, _user, option):
 
 #### daily bera
 def daily_bera_galxe_point(driver, user, option):
-    option["network_id"] = "137"
+    option["network_id"] = "1"
     switch_to_network(driver, user, option)
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
@@ -320,6 +321,7 @@ def well3_daily_mint(driver, _user, option):
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
+    click(driver, "/html/body/div/button")
     click(driver, "/html/body/div/div[1]/header/div/div[1]/a/div/img") # click start
     click(driver, "/html/body/div/div[2]/div/div[2]/div/div/div[1]/div/nav/ol/li[5]/a/span") # click master's wisdom
     click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # connect wallet
@@ -507,6 +509,7 @@ def well3_daily_ai_mint(driver, _user, option):
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
+    click(driver, "/html/body/div/button")
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button") # click start
     time.sleep(0.5)
     prompt = random.choice(prompts_list)
@@ -535,8 +538,8 @@ def ultiverse_daily_explore(driver, _user, option):
     time.sleep(0.5)
     driver.get("https://pilot.ultiverse.io")
     time.sleep(5)
-    if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[4]/div[2]/button", "Connect", 3):
-        click(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[4]/div[2]/button")
+    if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[3]/div/button", "Connect", 3):
+        click(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[3]/div/button")
         time.sleep(1)
         try:
             click(driver, "/html/body/div[1]/div/div[2]/div/div[1]/div/div[1]/div[2]/img[3]")
@@ -603,21 +606,51 @@ def ultiverse_daily_explore(driver, _user, option):
     return False
 # chrome-extension://nebnhfamliijlghikdgcigoebonmoibm/fullpage.html#/ aleo wallet
 
-def sequence_follow_twitter(driver, _user, option):
-    users_list = load_users_list()
-    user_ids = [user['twitter'].split("----")[0] for user in users_list]
-    users = users_list[4:]
-    for user in users:
-        logger.debug(user)
-        chrome = AdsPowerChromeDriver(user['user_id']) #, "127.0.0.1:5259", "C:\\Users\\myron\\AppData\\Roaming\\adspower_global\\cwd_global\\chrome_119\\chromedriver.exe")
-        chrome.start()
-        logger.debug(chrome.selemium)
-        logger.debug(chrome.driver_path)
-        driver = chrome.connect()
-        time.sleep(1)
-        clear_windows_and_resize(driver)
-        time.sleep(0.5)
-        # Randomly selecting 20 unique user_ids (or fewer if there aren't enough)
-        following = random.sample(user_ids, min(len(user_ids), 20))
-        follow_users(driver, user, {"following": following})
-        chrome.close()
+def google_login(driver, user, option):
+    google_accounts = user["google_account"].split("----")
+    email = google_accounts[0]
+    password = google_accounts[1]
+    recover_email = google_accounts[2]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("https://www.google.com/")
+    click(driver, "/html/body/div[1]/div[1]/div/div/div/div/div[2]/a")
+    input_content(driver, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[2]/div/div/div[1]/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input", email)
+    click(driver, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[3]/div/div[1]/div/div/button/span")
+    input_content(driver, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[2]/div/div/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input", password)
+    click(driver, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[3]/div/div[1]/div/div/button/span")
+    result = check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div[1]/div/div/div[2]/div[1]/div/div/a", "", 60)
+    logger.info("google login is {} for {}".format(result, user["acc_id"]))
+    return result
+
+
+def transfer_eth_to_ok_coin(_driver, user, _option):
+    w3 = Web3(Web3.HTTPProvider('https://rpc.ankr.com/eth'))
+    gas_price_limit = w3.to_wei(25, "gwei")
+    while(w3.eth.gas_price > gas_price_limit):
+        time.sleep(60)
+        logger.info("Too expensive, wait for a while")
+    
+    lower = 0.015
+    upper = 0.02
+    left_amount = 0.025
+    amount = round(random.uniform(lower, upper), 8)
+    value = w3.to_wei(amount, 'ether')
+    w3.eth.account.enable_unaudited_hdwallet_features()
+    account = w3.eth.account.from_mnemonic(" ".join(user["mnemonic"]), account_path="m/44'/60'/0'/0/0")
+    to_addr = w3.to_checksum_address(user["ok_addr"])
+
+    balance = w3.eth.get_balance(account.address)
+    if balance < value + w3.to_wei(left_amount, 'ether'):
+        logger.info("Not enough eth in {} and skip it".format(user["acc_id"]))
+        return True
+
+    logger.info("transfer {} eth from {} to {} for {}".format(amount, account.address, to_addr, user["acc_id"]))
+    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+    tx_hash = w3.eth.send_transaction({
+        "from": account.address,
+        "to": to_addr,
+        "value": value
+    })
+    logger.info(f"Transaction sent with hash: {tx_hash.hex()}")
+
