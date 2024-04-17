@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Set the log level
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Create handlers
 c_handler = logging.StreamHandler()

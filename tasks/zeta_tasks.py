@@ -14,7 +14,7 @@ import random
 import pyautogui  #<== need this to click on extension
 import time
 from basic_operator import (
-click, fetch_value,
+click, fetch_attribute,
 fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,

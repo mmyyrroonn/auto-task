@@ -21,13 +21,15 @@ from tasks.simple_tasks import (bera_drip, import_discord,
                    daily_bera_galxe_point, well3_daily_mint,
                    nfp_daily_check, test_daily, keplr_import,
                    okx_wallet_import, well3_daily_ai_mint,
-                   ultiverse_daily_explore, google_login, transfer_eth_to_ok_coin)
-from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task)
+                   ultiverse_daily_explore, google_login,
+                   transfer_eth_to_ok_coin, palio_daily, sub_wallet_import)
+from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb)
+from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
+                          dmail_send_message, odos_exchange, izumi_swap, zero_land_lending)
 from tasks.secwarex import (init_connect_and_scan)
 from tasks.zeta_tasks import (zetahub_register)
 import random
-from datetime import datetime
-from tinydb import TinyDB, Query
+from task_manager import (DailyTaskManager, OnceTaskManager)
 from logger import logger
 
 # 加载 .env 文件
@@ -89,19 +91,10 @@ class AdsPowerChromeDriver:
         return self.driver
     
 class Executor:
-    def __init__(self) -> None:
+    def __init__(self, task_manager) -> None:
         self.users_list = load_users_list()
-        self.history = TinyDB('history.json')
+        self.task_manager = task_manager
         pass
-    
-    def get_today_datestring(self):
-        # Get today's date
-        today = datetime.now()
-        
-        # Format the date as a string in the format 'YYYY-MM-DD'
-        date_string = today.strftime('%Y-%m-%d')
-        
-        return date_string
 
     def run_once(self, task_func, user, option, *args, **kwargs):
         chrome = AdsPowerChromeDriver(user['user_id'])
@@ -118,6 +111,7 @@ class Executor:
             time.sleep(2)
         except Exception as e:
             logger.error("An error occurred for {} in task {}".format(user['acc_id'], task_func))
+            logger.debug(e)
         finally:
             isManula = kwargs.get('human', False)
             if not result and isManula:
@@ -197,7 +191,7 @@ class Executor:
 
     def random_run_all_tasks(self, task_func_with_option_list, max_count=5, retry=3, *args, **kwargs):
         for i in range(retry): # to deal with failure
-            tasks = self.build_task_list(task_func_with_option_list)
+            tasks = self.task_manager.build_task_list(self.users_list, task_func_with_option_list)
             with ThreadPoolExecutor(max_workers=max_count) as pool:
                 # Dictionary to keep track of which user each future is processing
                 future_to_task = {}
@@ -212,7 +206,7 @@ class Executor:
                 for task in tasks[max_count:]:
                     # Wait for the next future to complete before submitting a new one
                     done_future = next(as_completed(future_to_task))
-                    self.handle_result(done_future.result(), future_to_task[done_future])
+                    self.task_manager.handle_result(done_future.result(), future_to_task[done_future])
                     time.sleep(1)
                     # Submit a new task to the pool
                     future = pool.submit(self.run_once, task["func"], task["user"], task["option"], *args, **kwargs)
@@ -223,87 +217,32 @@ class Executor:
 
                 # Wait for the remaining futures to complete
                 for future in as_completed(future_to_task):
-                    self.handle_result(future.result(), future_to_task[future])
-        tasks = self.build_task_list(task_func_with_option_list)
+                    self.task_manager.handle_result(future.result(), future_to_task[future])
+        tasks = self.task_manager.build_task_list(self.users_list, task_func_with_option_list)
         logger.info("Remaining tasks is {}".format(len(tasks)))
-    
-    def build_task_list(self, task_func_with_option_list, disable_history=False):
-        datestring = self.get_today_datestring()
-        tasks = []
-        for user in self.users_list:
-            for (task_func, option) in task_func_with_option_list:
-                if disable_history or not self.is_task_completed(datestring, user["user_id"], task_func.__name__):
-                    tasks.append({"date": datestring, "func": task_func, "user": user, "option": option})
-        random.shuffle(tasks)
-        logger.info("Total tasks count is {}".format(len(tasks)))
-        return tasks
-    
-    def handle_result(self, result, task):
-        """
-        Store or update the task completion result in the database.
-        If an identical task entry exists, it updates that entry.
-        Otherwise, it inserts a new entry into the database.
-        """
-        TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
-        search_result = self.history.search(
-            (TaskQuery.date == task["date"]) & 
-            (TaskQuery.user_id == task["user"]["user_id"]) & 
-            (TaskQuery.func_name == task["func"].__name__)
-        )
-        
-        # Data to be inserted or updated
-        task_data = {
-            'date': task["date"],
-            'user_id': task["user"]["user_id"],
-            'func_name': task["func"].__name__,
-            'completed': result
-        }
-        
-        if search_result:
-            # Update the existing task with the new result and increment the 'tries' count
-            existing_doc_id = search_result[0].doc_id
-            current_tries = search_result[0].get('tries', 1)  # Default to 1 if 'tries' does not exist
-            self.history.update(task_data | {'tries': current_tries + 1}, doc_ids=[existing_doc_id])
-        else:
-            # Insert a new task entry with 'tries' initialized to 1
-            self.history.insert(task_data | {'tries': 1})
-    
-    def is_task_completed(self, datestring, user_id, task_name):
-        TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
-        search_result = self.history.search(
-            (TaskQuery.date == datestring) & 
-            (TaskQuery.user_id == user_id) & 
-            (TaskQuery.func_name == task_name)
-        )
-        
-        if search_result:
-            completed = search_result[0].get('completed', True)  # Default to 1 if 'tries' does not exist
-            return completed
-        return False
+
+executor = Executor(DailyTaskManager())
+executor.sequence_run_tasks(zero_land_lending, {"password": password}, 15)
+# # executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
+
+# task_func_with_option_list = [(well3_daily_mint, {"password": password}, [x for x in range(1, 51)]),
+#                               (nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
+#                               (well3_daily_ai_mint, {"password": password}, [x for x in range(1, 51)]),
+#                               (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)]),
+#                               (well3_daily, None, [x for x in range(1, 51)]),
+#                               (palio_daily, {"password": password}, [x for x in range(1, 9)])]
+# executor.random_run_all_tasks(task_func_with_option_list, human=True)
 
 
-executor = Executor()
-# executor.sequence_run_tasks_without_driver(transfer_eth_to_ok_coin, None, 30)
+# once_executor = Executor(OnceTaskManager())
+# zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 51)]),
+#                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 51)]),
+#                               (mav_exchange, {"password": password}, [x for x in range(1, 51)]),
+#                               (tevaera_nft_mint, {"password": password}, [x for x in range(1, 51)]),
+#                               (dmail_send_message, {"password": password}, [x for x in range(1, 51)]),
+#                               (odos_exchange, {"password": password}, [x for x in range(1, 51)]),
+#                               (izumi_swap, {"password": password}, [x for x in range(1, 51)]),
+#                               (zero_land_lending, {"password": password}, [x for x in range(1, 51)]),
+#                               ]
 
-# executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
-# executor.batch_run_tasks(well3_daily_mint, {"password": password}, 0, 2)
-# executor.batch_run_tasks(qna3_daily, {"password": password}, 0, 5)
-# executor.batch_run_tasks(nfp_daily_check, {"password": password}, 0, 3)
-# executor.batch_run_tasks(well3_daily)
-
-task_func_with_option_list = [(well3_daily_mint, {"password": password}),
-                              (nfp_daily_check, {"password": password}),
-                              (well3_daily_ai_mint, {"password": password}),
-                              (ultiverse_daily_explore, {"password": password}),
-                              (well3_daily, None)]
-executor.random_run_all_tasks(task_func_with_option_list)
-
-# task_func_with_option_list = [(daily_bera_galxe_point, {"password": password}),
-#                               (well3_daily_mint, {"password": password}),
-#                               (nfp_daily_check, {"password": password}),
-#                               (well3_daily_ai_mint, {"password": password}),
-#                               (ultiverse_daily_explore, {"password": password}),
-#                               (well3_daily, None)]
-# executor.random_run_all_tasks(task_func_with_option_list, retry=1, human=True)
+# once_executor.random_run_all_tasks(zksync_task_function_list, max_count=2, retry=1, human=True)

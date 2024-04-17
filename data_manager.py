@@ -32,5 +32,4 @@ def load_users_list():
                                                     "dym_address": dym_address_info,
                                                     "google_account": google_account})
     print("Load user id list")
-    print(users_list)
     return users_list

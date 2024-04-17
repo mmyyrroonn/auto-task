@@ -57,14 +57,16 @@ def switch_to_network(driver, user, option):
     time.sleep(0.5)
     driver.get(network_url)
     click(driver, "/html/body/div[1]/div/div[2]/div[2]/button")
-    switch_to_metamask(driver)
-    input_password_and_unlock(driver, password)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
     driver.switch_to.window(driver.window_handles[0])
 
 def click(driver, xpath):
@@ -79,6 +81,8 @@ def fetch_content(driver, xpath):
 def input_content(driver, xpath, content):
     input_content = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
     input_content.clear()
+    for _ in range(len(input_content.get_attribute('value'))):
+        input_content.send_keys(Keys.BACKSPACE)
     input_content.send_keys(content)
     time.sleep(0.5)
 
@@ -198,7 +202,7 @@ def metamask_click(driver, xpaths: [str], max_wait_time: int) -> bool:
                 # Check if the exception is because of a closed driver
                 if 'no such window' in str(e).lower():
                     consecutive_closures += 1
-                    if consecutive_closures >= 5:
+                    if consecutive_closures >= 10:
                         logger.debug("Driver has been closed consecutively 5 times. Ending function.")
                         return True
                 else:
@@ -211,14 +215,14 @@ def input_password_and_unlock(driver, password):
     time.sleep(0.5)
     click(driver, "/html/body/div[1]/div/div/div/div/button") # unlock
 
-def fetch_value(driver, xpath, max_wait_time=5):
+def fetch_attribute(driver, xpath, attribute, max_wait_time=5):
     end_time = time.time() + max_wait_time
     while True:
         try:
             # Find the element using the provided XPath
             element = driver.find_element('xpath', xpath)
             # If the element's text matches the expected content, return True
-            return element.text
+            return element.get_attribute(attribute)
         except NoSuchElementException:
             # If the element is not found, we'll wait and retry
             pass
@@ -230,3 +234,116 @@ def fetch_value(driver, xpath, max_wait_time=5):
         # Wait for 1 second before trying again
         time.sleep(1)
     time.sleep(0.5)
+
+def check_content_color(driver, xpath, color, max_wait_time: int):
+    end_time = time.time() + max_wait_time
+    while True:
+        try:
+            # Find the element using the provided XPath
+            element = driver.find_element('xpath', xpath)
+            # If the element's text matches the expected content, return True
+            if color == element.value_of_css_property('color'):
+                return True
+        except NoSuchElementException:
+            # If the element is not found, we'll wait and retry
+            pass
+        
+        # Check if the timeout has been reached
+        if time.time() > end_time:
+            break
+        
+        # Wait for 1 second before trying again
+        time.sleep(1)
+    
+    # If the element was not found or content did not match within the max_wait_time, return False
+    return False
+
+def switch_to_okwallet(driver, max_wait_time=15):
+    end_time = time.time() + max_wait_time
+    okwallet_found = False
+
+    while True:
+        okwallet_found = found_okxwallet(driver)
+        
+        if okwallet_found or time.time() > end_time:
+            break
+        
+        time.sleep(0.5)  # Wait for 0.5 seconds before trying again
+    
+    if not okwallet_found:
+        raise TimeoutException("MetaMask window did not appear within the maximum wait time.")
+    
+def found_okxwallet(driver):
+    all_windows = driver.window_handles
+    logger.debug(all_windows)
+    if not all_windows:
+        return False
+    for window in all_windows:
+        driver.switch_to.window(window)
+        if "OKX Wallet" in driver.title:
+            return True
+    return False
+
+def input_password_and_unlock_okxwallet(driver, password):
+    input_content(driver, "/html/body/div[1]/div/div/div/div[3]/form/div[1]/div/div/div/div/div/input", password)
+    time.sleep(0.5)
+    click(driver, "/html/body/div[1]/div/div/div/div[3]/form/div[2]/div/div/div/button") # unlock
+
+def okxwallet_click(driver, xpaths: [str], max_wait_time: int) -> bool:
+    time.sleep(2) # wait for the tab
+    end_time = time.time() + max_wait_time
+    consecutive_closures = 0  # Counter for consecutive driver closures
+
+    while True:
+        logger.debug("check1")
+        time.sleep(1)
+        okxwallet_found = found_okxwallet(driver)
+        if time.time() > end_time:
+            break
+        time.sleep(1)
+        if not okxwallet_found:
+            logger.debug("not found")
+            consecutive_closures += 1
+            if consecutive_closures >= 3:
+                return True
+            continue
+        logger.debug("check3")
+        for xpath in xpaths:
+            try:
+                # Check if the element exists and is visible
+                element = driver.find_element('xpath', xpath)
+                logger.debug("check4")
+                consecutive_closures = 0
+                if element.is_displayed():
+                    # Click on the element if it is displayed
+                    element.click()
+                    break
+            except (NoSuchElementException, ElementClickInterceptedException):
+                logger.debug("check5")
+                continue  # If exception occurs, move to the next xpath
+            except WebDriverException as e:
+                # Check if the exception is because of a closed driver
+                if 'no such window' in str(e).lower():
+                    consecutive_closures += 1
+                    if consecutive_closures >= 10:
+                        logger.debug("Driver has been closed consecutively 5 times. Ending function.")
+                        return True
+                else:
+                    # If the error is not due to a closed driver, reset the counter
+                    consecutive_closures = 0
+    return True
+
+def okx_connect_and_switch_network(driver, password, network):
+    driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#home")
+    input_password_and_unlock_okxwallet(driver, password)
+    driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#connect-site")
+    if not check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/span/div/span", network, 5):
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/span/div/span")
+        input_content(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div[1]/div/input[2]", network)
+        time.sleep(3)
+        click(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div[2]/div[2]/span")
+
+def click_white_space(driver, x_coordinate = 10, y_coordinate = 10):
+    script = f"document.elementFromPoint({x_coordinate}, {y_coordinate}).click();"
+    driver.execute_script(script)
+    time.sleep(1)

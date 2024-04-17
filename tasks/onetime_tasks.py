@@ -15,11 +15,12 @@ import random
 import pyautogui  #<== need this to click on extension
 import time
 from basic_operator import (
-click, fetch_value,
+click, fetch_attribute,
 fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,
-metamask_click, switch_to_network, switch_to_page)
+metamask_click, switch_to_network, switch_to_page,
+switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click)
 from tasks.simple_tasks import follow_user
 
 def bitcraft_register(driver, user, option):
@@ -187,3 +188,123 @@ def humanity_register(driver, user, option):
     result = check_element_content(driver, "/html/body/div[1]/section/div/div[24]/div[1]/div/div[1]", "Welcome", 15)
     logger.info("humanity register is {}".format(result))
     return result
+
+def sell_pink(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("https://app.stellaswap.com/zh-CN/exchange/swap")
+    click(driver, "/html/body/div/div/header/nav/div/div/div[2]/div/div[3]/button")
+    click(driver, "/html/body/reach-portal/div[3]/div/div/div/div/div/div/div[3]/div[1]/div[1]")
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                             ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div[2]/div[1]/div/div[1]/button/div/div[2]/div[2]/div")
+    input_content(driver, "/html/body/reach-portal/div[3]/div/div/div/div/div/div/div[2]/input", "pink")
+    time.sleep(1)
+    click(driver, "/html/body/reach-portal/div[3]/div/div/div/div/div/div/div[4]/div[1]/div/div/div")
+    time.sleep(1)
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div[2]/div[1]/div/div[2]/div/div[1]/div/span[2]")
+    time.sleep(5)
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div[3]/div/button")
+    switch_to_okwallet(driver)
+    click(driver, "/html/body/div[1]/div/div/div/div/div/div[3]/div/div/div[1]/div[2]/div/div/div[1]/div/div[3]")
+    click(driver, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div[1]/div[2]")
+    input_content(driver, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[2]/div[2]/input[2]", "40000")
+    click(driver, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div[2]/div[2]/button")
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                             ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
+    _ = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div[3]/button", "Swap", 30)
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div[3]/button")
+    click(driver, "/html/body/reach-portal[2]/div[3]/div/div/div/div/div/div/div[3]/button")
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                             ],
+                    30)
+    result = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div[2]/div[1]/div/div[2]/div/div[1]/div/span[2]", "0.00", 60)
+    logger.info("sell pink is {} for {}".format(result, user['acc_id']))
+    return result
+
+
+def bridge_usdc_to_arb(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("https://app.stellaswap.com/zh-CN/exchange/cross-chain-swap")
+    # click(driver, "/html/body/div/div/header/nav/div/div/div[2]/div/div[3]/button")
+    # click(driver, "/html/body/reach-portal/div[3]/div/div/div/div/div/div/div[3]/div[1]/div[1]")
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                             ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[1]/span[1]/a/button")
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[2]/ul/li[2]/button")
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[2]/span/button")
+    if not check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[1]/span[2]/span[1]/a[1]/span/button/span/span/span", "Moonbeam", 10):
+        logger.info("bridge usdc is something wrong for {}".format(user['acc_id']))
+        return False
+
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[3]/span[2]/span[1]/a[1]/span/button")
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/ul/li[3]/button")
+    if not check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[3]/span[2]/span[1]/a[1]/span/button/span/span/span", "Arbitrum", 10):
+        logger.info("bridge usdc is something wrong for {}".format(user['acc_id']))
+        return False
+
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[3]/span[2]/span[1]/a[2]/span/button")
+    input_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span/span/input", "USDT")
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/ul/li/button/span[2]/span/span")
+
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[1]/span[2]/span[3]/span[2]/button")
+    _ = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[1]/span/span[3]/span[2]/span[2]/span/span/span/span", ".", 30)
+    #
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[3]/button")
+    switch_to_okwallet(driver)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                             ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
+    if check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/div/span[1]/span/span/span[1]", "Processing", 10):
+        result = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/div/span[1]/span/span/span[1]", "Complete", 60)
+        logger.info("bridge usdc is {} for {}".format(result, user['acc_id']))
+        return result
+    _ = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[3]/button/span/span/span", "Submit", 60)
+    click(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/span[3]/button")
+    switch_to_okwallet(driver)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
+    result = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/div/span[1]/span/span/span[1]", "Complete", 120)
+    logger.info("bridge usdc is {} for {}".format(result, user['acc_id']))
+    return result
+    

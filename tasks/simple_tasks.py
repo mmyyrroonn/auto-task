@@ -17,11 +17,12 @@ import time
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from basic_operator import (
-click, fetch_value,
+click, fetch_attribute,
 fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,
-metamask_click, switch_to_network)
+metamask_click, switch_to_network, check_content_color,
+switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click)
 #### import metamask
 
 def import_metamask(driver, mnemonic, password):
@@ -211,7 +212,10 @@ def well3_daily(driver, _user, option):
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
     time.sleep(0.5)
-    click(driver, "/html/body/div/button")
+    try:
+        click(driver, "/html/body/div/button")
+    except:
+        pass
     time.sleep(0.5)
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[1]/div/div/div[5]/div[2]/button") # click start
     click(driver, "/html/body/div/div[1]/main/div[3]/div/div/button/div") # click i'm ready
@@ -321,39 +325,48 @@ def well3_daily_mint(driver, _user, option):
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
-    click(driver, "/html/body/div/button")
+    try:
+        click(driver, "/html/body/div/button")
+    except:
+        pass
     click(driver, "/html/body/div/div[1]/header/div/div[1]/a/div/img") # click start
     click(driver, "/html/body/div/div[2]/div/div[2]/div/div/div[1]/div/nav/ol/li[5]/a/span") # click master's wisdom
     click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # connect wallet
     click(driver, "/html/body/div[2]/div/div/div[2]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button/div/div/div[2]") # click metamask
-    switch_to_metamask(driver)
-    input_password_and_unlock(driver, password)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
     time.sleep(1)
     driver.switch_to.window(driver.window_handles[0])
     if check_element_content(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button", "Link", 3):
         click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # Link
-        metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
         time.sleep(2)
         driver.switch_to.window(driver.window_handles[0])
     if check_element_content(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button", "Switch", 3):
         click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # Switch
-        metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
         time.sleep(2)
         driver.switch_to.window(driver.window_handles[0])
     if check_element_content(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/div[2]", "", 3):
@@ -361,12 +374,14 @@ def well3_daily_mint(driver, _user, option):
     else:
         click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/div[2]/div[2]") # free
     click(driver, "/html/body/div/div[1]/div[4]/div/div/div/div/div") # mint
-    switch_to_metamask(driver)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]", # Check
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
     time.sleep(2)
     logger.info("well3 daily mint success")
     return True
@@ -387,22 +402,31 @@ def nfp_daily_check(driver, _user, option):
     ### tricky solution for wallet connect
     driver.execute_script(
     """document.querySelector('w3m-modal').shadowRoot.querySelector('w3m-modal-router').shadowRoot.querySelector('w3m-connect-wallet-view').shadowRoot.querySelector('w3m-desktop-wallet-selection').shadowRoot.querySelector('w3m-modal-footer').querySelector('div.w3m-grid').querySelector('w3m-wallet-button').shadowRoot.querySelector('button').click();""")
-    switch_to_metamask(driver)
-    input_password_and_unlock(driver, password)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
+                    ],
+                    30)
     time.sleep(1)
     driver.switch_to.window(driver.window_handles[0])
     if check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/span", ":", 5):
         logger.info("nfp daily True")
         return True
     click(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/button/span")
-    switch_to_metamask(driver)
-    click(driver, "/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]") # confirm
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
     time.sleep(1)
     driver.switch_to.window(driver.window_handles[0])
     result = check_element_content(driver, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div/span", ":", 30)
@@ -470,7 +494,7 @@ def okx_wallet_import(driver, user, option):
     logger.debug(clipboard_content)
     return True
 
-def well3_daily_ai_mint(driver, _user, option):
+def well3_daily_ai_mint(driver, user, option):
     prompts_list = [
     "Explore the secrets of the ancient ruins.",
     "A journey through the heart of the forest.",
@@ -503,29 +527,41 @@ def well3_daily_ai_mint(driver, _user, option):
     "The role of dreams in our lives.",
     "Celebrating cultural diversity around the world."
     ]
-
     option["network_id"] = "204"
-    switch_to_network(driver, _user, option)
+    switch_to_network(driver, user, option)
     driver.switch_to.window(driver.window_handles[0])
     time.sleep(0.5)
     driver.get("https://well3.com/mission")
-    click(driver, "/html/body/div/button")
+    try:
+        click(driver, "/html/body/div/button")
+    except:
+        pass
+    if check_element_content(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button", "Claim", 5):
+        click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button")
+        logger.info("well3 daily mint ai True for {}".format(user['acc_id']))
+        return True
+    if check_element_content(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[3]/p", "Add", 5):
+        logger.info("well3 daily mint ai True")
+        return True
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button") # click start
     time.sleep(0.5)
     prompt = random.choice(prompts_list)
     input_content(driver, "/html/body/div/div[3]/div/div/div/input", prompt ) # click i'm ready
     click(driver, "/html/body/div/div[3]/div/div/div/div[13]/button[2]") # click mint
-    switch_to_metamask(driver)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]", # Check
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+    driver.switch_to.window(driver.window_handles[0])
     check_element_content(driver, "/html/body/div/div[3]/div/div/div[3]/button", "Continue", 120)
     click(driver, "/html/body/div/div[3]/div/div/div[3]/button")
     result = check_element_content(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button", "Claim", 10)
     click(driver, "/html/body/div/div[1]/main/section[1]/div[3]/div[2]/div[1]/div[1]/div/div/div[3]/div/div/div[5]/div[2]/button")
-    logger.info("well3 daily mint ai {}".format(result))
+    logger.info("well3 daily mint ai {} for {}".format(result, user['acc_id']))
     return result
 
 def ultiverse_daily_explore(driver, _user, option):
@@ -546,15 +582,17 @@ def ultiverse_daily_explore(driver, _user, option):
             time.sleep(1)
         except:
             pass
-        switch_to_metamask(driver)
+        switch_to_okwallet(driver)
         # input_password_and_unlock(driver, password)
         time.sleep(1)
-        metamask_click(driver, ["/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Approve
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Connect
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
         time.sleep(3)
     # if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/button", "Join", 5):
     # 使用JavaScript来模拟点击
@@ -579,28 +617,30 @@ def ultiverse_daily_explore(driver, _user, option):
 
     explore_count = 0
     try:
-        soul_number = fetch_value(driver, "/html/body/div[1]/div/div[1]/div/header/div/div[2]/div[2]/div[2]/div/p[1]/span[2]")
+        soul_number = fetch_content(driver, "/html/body/div[1]/div/div[1]/div/header/div/div[2]/div[2]/div[2]/div/p[1]/span[2]")
         explore_count = int(int(soul_number)/50)
     except:
         pass
     time.sleep(1)
     logger.debug("explore_count is {}".format(explore_count))
-    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div/button/label")   
+    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div[2]/button")
+    # for i in range(min(explore_count, 5)):
+    #     click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[{}]/div[5]/div[2]/button".format(str(i+1)))
+    #     time.sleep(0.5)
     time.sleep(1)
-    for i in range(min(explore_count, 5)):
-        click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[{}]/div[5]/div/button/label".format(str(i+2)))
-        time.sleep(0.5)
     click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[4]/div/div[2]/button")
     click(driver, "/html/body/div[3]/div/div/div[3]/button")
-    switch_to_metamask(driver)
-    metamask_click(driver, ["/html/body/div[1]/div/div/div/div[3]/div[3]/footer/button[2]", # Check
-                                            "/html/body/div[1]/div/div/div/div[2]/div/button[2]", # Switch
-                                            "/html/body/div[1]/div/div/div/div[3]/div[2]/footer/button[2]", # Next
-                                            "/html/body/div[1]/div/div/div/div[4]/footer/button[2]"], # Sign
-                                            30)
-    result = check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/div/div[3]/button", "Close", 50)
+    okxwallet_click(driver,
+                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                    "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                    "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                    "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                    "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                ],
+                30)
+    result = check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[109]/div/div[3]/button", "Close", 50)
     if result:
-        click(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/div/div[3]/button")
+        click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[109]/div/div[3]/button")
         logger.info("ultiverse daily explore {}".format(result))
         return True
     return False
@@ -654,3 +694,118 @@ def transfer_eth_to_ok_coin(_driver, user, _option):
     })
     logger.info(f"Transaction sent with hash: {tx_hash.hex()}")
 
+def palio_daily(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("https://xter.io/activities/palio")
+    click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div/div[2]/div[2]/button")
+    click(driver, "/html/body/div[3]/div[3]/div/section/div/div/div[1]/div/div/div[2]")
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                             ],
+                    30)
+    time.sleep(5)
+    reclick = False
+    if not check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[1]/div/p[2]", "1/1", 5):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[1]/button")
+    try:
+        click(driver, "/html/body/div[3]/div[3]/div/section/div/div[2]/button[2]")
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div[3]/button[2]", # Confirm
+                             ],
+                    30)
+        reclick = True
+    except:
+        pass
+    time.sleep(5)
+    if reclick:
+        if not check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[1]/div/p[2]", "1/1", 5):
+            click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[1]/button")
+            okxwallet_click(driver,
+            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div[3]/button[2]", # Confirm
+                        ],
+            30)
+    time.sleep(1)
+    if not check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[2]/div/p[2]", "1/1", 5):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[2]/button")
+        okxwallet_click(driver,
+            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div[3]/button[2]", # Confirm
+                        ],
+            30)
+    time.sleep(1)
+    if not check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[3]/div/p[2]", "1/1", 5):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/ul/li[3]/button")
+        okxwallet_click(driver,
+            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                "/html/body/div[1]/div/div/div/div[3]/button[2]", # Confirm
+                        ],
+            30)
+    time.sleep(2)
+    if check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[1]/span[2]", "1", 10):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[1]")
+    time.sleep(1)
+    if check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[2]/span[2]", "1", 10):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[2]")
+    time.sleep(1)
+    if check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[3]/span[2]", "1", 10):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[1]/div[2]/div[2]/div[2]/button[3]")
+    time.sleep(1)
+    if check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[2]/div[1]/div[3]/div[1]/div/div/div[6]/span", "Get", 10):
+        click(driver, "/html/body/div[1]/div/section/div/main/section[2]/div[1]/div[3]/div[1]/div/div/div[6]")
+    result = check_element_content(driver, "/html/body/div[1]/div/section/div/main/section[2]/div[1]/div[3]/div[1]/div/div/div[7]/span", "1/1", 10)
+    logger.info("palio daily {} for {}".format(result, user['acc_id']))
+    return result
+
+def sub_wallet_import(driver, user, option):
+    password = option["password"]
+    mnemonic = user["mnemonic"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("chrome-extension://onhogfjeacnfoofkfgppdlbmlmnplgbn/index.html#/welcome")
+    click(driver, "/html/body/div/div[3]/div[1]/div[2]/div[2]/div[3]/button[2]") # import
+    click(driver, "/html/body/div/div[2]/div/div[2]/div/div[2]/div[2]/div[1]/button") # scroll down
+    time.sleep(2)
+    click(driver, "/html/body/div/div[2]/div/div[2]/div/div[2]/div[2]/div[2]/label/span[2]")
+    click(driver, "/html/body/div/div[2]/div/div[2]/div/div[2]/div[2]/div[2]/div/button") # Continue
+    click(driver, "/html/body/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/div[1]/div/div")
+    click(driver, "/html/body/div/div[2]/div[3]/div[2]/div/div[2]/div[2]/div/button")
+    input_content(driver, "/html/body/div/div[3]/div[1]/div/div[2]/div/form/div[1]/div/div/div/div/div/div/span/input", password)
+    input_content(driver, "/html/body/div/div[3]/div[1]/div/div[2]/div/form/div[2]/div/div/div/div/div/div/span/input", password)
+    click(driver, "/html/body/div/div[3]/div[1]/div/div[2]/div/form/div[4]/div/div/div[1]/div/label/span[2]")
+    click(driver, "/html/body/div/div[3]/div[1]/div/div[3]/div/button")
+    time.sleep(1)
+    for word in mnemonic:
+        driver.switch_to.active_element.send_keys(word) # input each mnemonic to current textbox
+        driver.find_element(By.CSS_SELECTOR, 'body').send_keys(Keys.TAB) # switch to next textbox
+        time.sleep(0.25)
+    driver.find_element(By.CSS_SELECTOR, 'body').send_keys(Keys.TAB) # switch to next textbox
+    click(driver, "/html/body/div/div[3]/div[1]/div/div[3]/div/button")
+    click(driver, "/html/body/div/div[3]/div[1]/div[3]/div/button") # confirm
+    click(driver, "/html/body/div/div[2]/div[3]/div[2]/div/div[2]/div[3]/div/button[1]")
+    return True
