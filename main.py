@@ -25,7 +25,8 @@ from tasks.simple_tasks import (bera_drip, import_discord,
                    transfer_eth_to_ok_coin, palio_daily, sub_wallet_import)
 from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb)
 from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
-                          dmail_send_message, odos_exchange, izumi_swap, zero_land_lending)
+                          dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
+                          koi_finance, reactor_fusion_lending, pancake_swap)
 from tasks.secwarex import (init_connect_and_scan)
 from tasks.zeta_tasks import (zetahub_register)
 import random
@@ -222,7 +223,7 @@ class Executor:
         logger.info("Remaining tasks is {}".format(len(tasks)))
 
 executor = Executor(DailyTaskManager())
-executor.sequence_run_tasks(zero_land_lending, {"password": password}, 15)
+executor.sequence_run_tasks(pancake_swap, {"password": password}, 2)
 # # executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
 
 # task_func_with_option_list = [(well3_daily_mint, {"password": password}, [x for x in range(1, 51)]),
@@ -231,7 +232,7 @@ executor.sequence_run_tasks(zero_land_lending, {"password": password}, 15)
 #                               (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)]),
 #                               (well3_daily, None, [x for x in range(1, 51)]),
 #                               (palio_daily, {"password": password}, [x for x in range(1, 9)])]
-# executor.random_run_all_tasks(task_func_with_option_list, human=True)
+# executor.random_run_all_tasks(task_func_with_option_list)
 
 
 # once_executor = Executor(OnceTaskManager())
