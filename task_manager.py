@@ -23,7 +23,7 @@ class DailyTaskManager:
         tasks = []
         for user in user_list:
             for (task_func, option, todo_users) in task_func_with_option_list:
-                if disable_history or not self.is_task_completed(datestring, user["user_id"], task_func.__name__):
+                if disable_history or not self.is_task_completed(datestring, user["acc_id"], task_func.__name__):
                     if user["acc_id"] in todo_users:
                         tasks.append({"date": datestring, "func": task_func, "user": user, "option": option})
         random.shuffle(tasks)
@@ -37,17 +37,17 @@ class DailyTaskManager:
         Otherwise, it inserts a new entry into the database.
         """
         TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
+        # Search for an existing task with the same date, acc_id, and func_name
         search_result = self.history.search(
             (TaskQuery.date == task["date"]) & 
-            (TaskQuery.user_id == task["user"]["user_id"]) & 
+            (TaskQuery.acc_id == task["user"]["acc_id"]) & 
             (TaskQuery.func_name == task["func"].__name__)
         )
         
         # Data to be inserted or updated
         task_data = {
             'date': task["date"],
-            'user_id': task["user"]["user_id"],
+            'acc_id': task["user"]["acc_id"],
             'func_name': task["func"].__name__,
             'completed': result
         }
@@ -61,12 +61,12 @@ class DailyTaskManager:
             # Insert a new task entry with 'tries' initialized to 1
             self.history.insert(task_data | {'tries': 1})
     
-    def is_task_completed(self, datestring, user_id, task_name):
+    def is_task_completed(self, datestring, acc_id, task_name):
         TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
+        # Search for an existing task with the same date, acc_id, and func_name
         search_result = self.history.search(
             (TaskQuery.date == datestring) & 
-            (TaskQuery.user_id == user_id) & 
+            (TaskQuery.acc_id == acc_id) & 
             (TaskQuery.func_name == task_name)
         )
         
@@ -94,11 +94,11 @@ class OnceTaskManager:
         datestring = self.get_today_datestring()
         tasks = []
         for user in user_list:
-            if self.is_user_skip(datestring, user["user_id"]):
+            if self.is_user_skip(datestring, user["acc_id"]):
                 continue
             random.shuffle(task_func_with_option_list)
             for (task_func, option, todo_users) in task_func_with_option_list:
-                if disable_history or not self.is_task_skip(datestring, user["user_id"], task_func.__name__):
+                if disable_history or not self.is_task_skip(datestring, user["acc_id"], task_func.__name__):
                     if user["acc_id"] in todo_users:
                         tasks.append({"date": datestring, "func": task_func, "user": user, "option": option})
                         break # Just one task for one user one time
@@ -113,17 +113,17 @@ class OnceTaskManager:
         Otherwise, it inserts a new entry into the database.
         """
         TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
+        # Search for an existing task with the same date, acc_id, and func_name
         search_result = self.history.search(
             (TaskQuery.date == task["date"]) & 
-            (TaskQuery.user_id == task["user"]["user_id"]) & 
+            (TaskQuery.acc_id == task["user"]["acc_id"]) & 
             (TaskQuery.func_name == task["func"].__name__)
         )
         
         # Data to be inserted or updated
         task_data = {
             'date': task["date"],
-            'user_id': task["user"]["user_id"],
+            'acc_id': task["user"]["acc_id"],
             'func_name': task["func"].__name__,
             'completed': result
         }
@@ -137,11 +137,11 @@ class OnceTaskManager:
             # Insert a new task entry with 'tries' initialized to 1
             self.history.insert(task_data | {'tries': 1})
     
-    def is_task_skip(self, datestring, user_id, task_name):
+    def is_task_skip(self, datestring, acc_id, task_name):
         TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
+        # Search for an existing task with the same date, acc_id, and func_name
         search_result = self.history.search(
-            (TaskQuery.user_id == user_id) & 
+            (TaskQuery.acc_id == acc_id) & 
             (TaskQuery.func_name == task_name)
         )
         
@@ -149,11 +149,11 @@ class OnceTaskManager:
             completed = search_result[0].get('completed', True)  # Default to 1 if 'tries' does not exist
             return completed
         return False
-    def is_user_skip(self, todaystring, user_id):
+    def is_user_skip(self, todaystring, acc_id):
         TaskQuery = Query()
-        # Search for an existing task with the same date, user_id, and func_name
+        # Search for an existing task with the same date, acc_id, and func_name
         search_result = self.history.search(
-            (TaskQuery.user_id == user_id)
+            (TaskQuery.acc_id == acc_id)
         )
 
         # Step 2: Check if we have at least one task and get its date

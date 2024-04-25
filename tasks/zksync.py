@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.action_chains import ActionChains
 from dotenv import load_dotenv
 from logger import logger
 import pyperclip
@@ -20,7 +21,8 @@ fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,
 metamask_click, switch_to_network, switch_to_page, click_white_space,
-switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click, okx_connect_and_switch_network)
+switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click, okx_connect_and_switch_network,
+okx_wallet_confirm)
 
 def era_land_eth(driver, user, option):
     password = option["password"]
@@ -30,14 +32,7 @@ def era_land_eth(driver, user, option):
     okx_connect_and_switch_network(driver, password, network)
     driver.get("https://app.eralend.com/")
     try:
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         logger.debug("auto login")
     except:
         logger.debug("No auto login")
@@ -55,14 +50,7 @@ def era_land_eth(driver, user, option):
         time.sleep(1)
         driver.execute_script(
         """document.querySelector('onboard-v2').shadowRoot.querySelector('section > div > div > div > div > div > div > div.content.flex.flex-column.svelte-1qwmck3 > div.scroll-container.svelte-1qwmck3 > div.svelte-1qwmck3 > div > div > div:nth-child(3) > button').click();""")
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
     try:
         click(driver, "/html/body/div/header/div/div/div[2]/div/div[2]/li") # wrong network
         click(driver, "/html/body/div[2]/div[3]/ul/li[1]/span[1]")
@@ -76,14 +64,7 @@ def era_land_eth(driver, user, option):
     click(driver, "/html/body/div/div[1]/div[2]/div[3]/div[2]/div[8]/button") # Manage
     click(driver, "/html/body/div[2]/div[3]/div/div/div[2]/form/div/div[1]/div[1]/div[1]/p[3]") #75%
     click(driver, "/html/body/div[2]/div[3]/div/div/div[2]/form/div/button") #supply
-    okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+    okx_wallet_confirm(driver)
     _ = check_element_content(driver, "/html/body/div[3]/div[3]/div/div/button[2]", "Ok", 60)
     click(driver, "/html/body/div[3]/div[3]/div/div/button[2]")
     logger.debug("supply success")
@@ -95,14 +76,7 @@ def era_land_eth(driver, user, option):
     click(driver, "/html/body/div[2]/div[3]/div/div/div[1]/div/div/button[2]")
     click(driver, "/html/body/div[2]/div[3]/div/div/div[3]/form/div/div/div[1]/p[1]") #MAX
     click(driver, "/html/body/div[2]/div[3]/div/div/div[3]/form/div/button") #supply
-    okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+    okx_wallet_confirm(driver)
     result = check_element_content(driver, "/html/body/div[3]/div[3]/div/div/button[2]", "Ok", 60)
     logger.info("era land is {} for {}".format(result, user['acc_id']))
     return result
@@ -154,12 +128,14 @@ def okx_wallet_exchange(driver, user, option):
         time.sleep(3)
         click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button")
 
-        _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button", "Swap", 30)
+        _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button", "Swap", 60)
         time.sleep(1)
         click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button")
         time.sleep(1)
+        if check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/button/span", "Update", 5):
+            click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/button")
         click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/div/button")
-        result = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div", "Complete", 30)
+        result = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div", "Complete", 60)
         logger.info("okx_wallet_exchange is {} for {}".format(result, user['acc_id']))
         return result
     else:
@@ -207,14 +183,7 @@ def mav_exchange(driver, user, option):
     okx_connect_and_switch_network(driver, password, network)
     driver.get("https://app.mav.xyz/?chain=324")
     try:
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         logger.debug("auto login")
     except:
         logger.debug("No auto login")
@@ -226,14 +195,7 @@ def mav_exchange(driver, user, option):
         time.sleep(1)
         driver.execute_script(
             """document.querySelector('body > onboard-v2').shadowRoot.querySelector('section > div > div > div > div > div > div > div.content.flex.flex-column.svelte-ro440k > div.scroll-container.svelte-ro440k > div.svelte-ro440k > div > div > button:nth-child(2)').click();""")
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         logger.debug("connect")
     driver.get("https://app.mav.xyz/?chain=1")
     click(driver, "/html/body/div/div/header[2]/div/div/div/div[2]/div[3]/div") # network
@@ -260,14 +222,7 @@ def mav_exchange(driver, user, option):
         click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
         time.sleep(1)
         click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         
         _ = check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div/div[1]/div[2]/div/button[1]", "Done", 60)
 
@@ -280,24 +235,10 @@ def mav_exchange(driver, user, option):
         time.sleep(1)
         if check_element_content(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button", "Approve", 5):
             click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
-            okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+            okx_wallet_confirm(driver)
         _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button", "Confirm", 60)
         click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         
         result = check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div/div[1]/div[2]/div/button[1]", "Done", 30)
         logger.info("mav exchange is {} for {}".format(result, user['acc_id']))
@@ -318,24 +259,10 @@ def mav_exchange(driver, user, option):
         time.sleep(1)
         if check_element_content(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button", "Approve", 5):
             click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
-            okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+            okx_wallet_confirm(driver)
         _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button", "Confirm", 60)
         click(driver, "/html/body/div[1]/div/div/div/div/div[1]/div[2]/div/button")
-        okxwallet_click(driver,
-                        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                                ],
-                        30)
+        okx_wallet_confirm(driver)
         
         result = check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div/div[1]/div[2]/div/button[1]", "Done", 60)
         logger.info("mav exchange is {} for {}".format(result, user['acc_id']))
@@ -355,15 +282,7 @@ def tevaera_nft_mint(driver, user, option):
         click(driver, "/html/body/div[3]/div/div/div[1]/button")
     click(driver, "/html/body/div/div/div/section[2]/div[1]/div[3]/button[3]")
     try:
-        okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+        okx_wallet_confirm(driver)
     except:
         pass
     if check_element_content(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/button[1]", "Login", 5):
@@ -371,29 +290,13 @@ def tevaera_nft_mint(driver, user, option):
     click(driver, "/html/body/div/div/div/section[2]/div[1]/div[3]/button[3]")
     click(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/button[1]")
     time.sleep(5)
-    okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+    okx_wallet_confirm(driver)
     if check_element_content(driver, "/html/body/div/div/div/div/div[1]/section/div[1]/h3/span[1]", "Welcome", 5):
         logger.info("tevaera_nft_mint is {} for {}".format(True, user['acc_id']))
         return True
     if check_element_content(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/div/button", "Mint", 10):
         click(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/div/button")
-        okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+        okx_wallet_confirm(driver)
         _ = check_element_content(driver, "/html/body/div[3]/div/div/div[2]/div/div[2]/a/button", "Ok", 60)
         click(driver, "/html/body/div[3]/div/div/div[2]/div/div[2]/a/button")
         if check_element_content(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/h2", "Guardian", 30):
@@ -411,26 +314,10 @@ def dmail_send_message(driver, user, option):
     driver.get("https://mail.dmail.ai/inbox")
     if check_element_content(driver, "/html/body/div/div/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/ul/li[1]/span", "MetaMask", 10):
         click(driver, "/html/body/div/div/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/ul/li[1]")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     if check_element_content(driver, "/html/body/div/div/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/ul/li[1]/span", "MetaMask", 5):
         click(driver, "/html/body/div/div/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/ul/li[1]")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     if check_element_content(driver, "/html/body/div[1]/div/div[2]/div[3]/div/div/div[4]/a", "Next step", 5):
         click(driver, "/html/body/div[1]/div/div[2]/div[3]/div/div/div[4]/a")
         time.sleep(1)
@@ -471,15 +358,7 @@ def dmail_send_message(driver, user, option):
         click(driver, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[3]/div[2]/div/div/span")
         click(driver, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[3]/div[2]/div/ul/li[3]")
     click(driver, "/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div[3]/div[1]/a[1]")
-    okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+    okx_wallet_confirm(driver)
     result = check_element_content(driver, "/html/body/div[1]/div/div[2]/div[1]/div[1]", "Sent", 60)
     logger.info("dmail sent is {} for {}".format(result, user['acc_id']))
     return result
@@ -494,15 +373,7 @@ def odos_exchange(driver, user, option):
     if check_element_content(driver, "/html/body/div/div/header/div/nav/div[1]/div/div[2]/div[2]/div/button", "Connect", 10):
         click(driver, "/html/body/div/div/header/div/nav/div[1]/div/div[2]/div[2]/div/button")
         click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[4]/div/div/div/div[3]/div/div[1]/button")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     if not check_element_content(driver, "/html/body/div/div/header/div/nav/div[1]/div/div[2]/div[1]/div/div/button/div[1]/div[2]/span", "zkSync", 10):
         click(driver, "/html/body/div/div/header/div/nav/div[1]/div/div[2]/div[1]/div/div/button")
         click(driver, "/html/body/div/div/header/div/nav/div[1]/div/div[2]/div[1]/div/div/div/ul/li[6]")
@@ -534,15 +405,7 @@ def odos_exchange(driver, user, option):
 
         if check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button/div/span", "Swap", 5):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         _ = check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[1]/div/div[2]/span", "Completed", 60)
         click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[1]/div/div[5]/button") # Return to swap
@@ -554,27 +417,11 @@ def odos_exchange(driver, user, option):
         time.sleep(3)
         if check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button/div/span", "Approve", 10):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         if check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button/div/span", "Swap", 60):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         result = check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[1]/div/div[2]/span", "Completed", 60)
         logger.info("odos exchange is {} for {}".format(result, user['acc_id']))
         return result
@@ -606,27 +453,11 @@ def odos_exchange(driver, user, option):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
         if check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button/div/span", "Approve", 10):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         if check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button/div/span", "Swap", 60):
             click(driver, "/html/body/div/div/main/div/div/div[1]/div/div[2]/div/button")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         result = check_element_content(driver, "/html/body/div/div/main/div/div/div[1]/div/div[1]/div/div[2]/span", "Completed", 60)
         logger.info("odos exchange is {} for {}".format(result, user['acc_id']))
         return result
@@ -639,15 +470,7 @@ def izumi_swap(driver, user, option):
     okx_connect_and_switch_network(driver, password, network)
     driver.get("https://izumi.finance/trade/swap")
     try:
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     except:
         pass
     if check_element_content(driver, "/html/body/div[1]/div/div/div[4]/div[2]/div/div[1]/button", "Remove", 5):
@@ -682,15 +505,7 @@ def izumi_swap(driver, user, option):
         time.sleep(3)
         if check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]", "Swap", 5):
             click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         _ = check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div[3]/div[2]/div/p[1]", "Swap Success", 60)
         click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div[3]/div[1]/img") # Return to swap
@@ -702,27 +517,11 @@ def izumi_swap(driver, user, option):
         time.sleep(3)
         if check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[2]", "Approve", 10):
             click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[2]")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         if check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]", "Swap", 60):
             click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         result = check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div[3]/div[2]/div/p[1]", "Swap Success", 60)
         logger.info("izumi_swap exchange is {} for {}".format(result, user['acc_id']))
         return result
@@ -752,27 +551,11 @@ def izumi_swap(driver, user, option):
         time.sleep(3)
         if check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[2]", "Approve", 10):
             click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[2]")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         
         if check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]", "Swap", 60):
             click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[6]/div[2]/button[1]")
-            okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+            okx_wallet_confirm(driver)
         result = check_element_content(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div/div[2]/div[3]/div[2]/div/p[1]", "Swap Success", 60)
         logger.info("izumi_swap exchange is {} for {}".format(result, user['acc_id']))
         return result
@@ -785,30 +568,14 @@ def zero_land_lending(driver, user, option):
     okx_connect_and_switch_network(driver, password, network)
     driver.get("https://app.zerolend.xyz/reserve-overview/?underlyingAsset=0x5aea5775959fbc2557cc8789bc1bf90a239d9a91&marketName=proto_zksync_era_v3")
     try:
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     except:
         pass
     if check_element_content(driver, "/html/body/div[1]/header/button", "Connect", 5):
         click(driver, "/html/body/div[1]/header/button")
         time.sleep(2)
         click(driver, "/html/body/div[8]/div[3]/div[1]/button[3]")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     time.sleep(6)
     click(driver, "/html/body/div[1]/main/div[2]/div/div[2]/div[2]/div/div[1]/div/button[2]")
     time.sleep(2)
@@ -822,15 +589,7 @@ def zero_land_lending(driver, user, option):
     click(driver, "/html/body/div[1]/main/div[2]/div/div[2]/div[2]/div/div[3]/div[1]/div[2]/button") # Supply
     input_content(driver, "/html/body/div[8]/div[3]/div[1]/div[2]/div[1]/div[1]/input", value_amount)
     click(driver, "/html/body/div[8]/div[3]/div[3]/button")
-    okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+    okx_wallet_confirm(driver)
     _ = check_element_content(driver, "/html/body/div[8]/div[3]/div[1]/h2", "All done", 60)
     click(driver, "/html/body/div[8]/div[3]/div[2]/button")
 
@@ -843,38 +602,14 @@ def zero_land_lending(driver, user, option):
     time.sleep(5)
     if check_element_content(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]/div/p", "Approve to", 5):
         click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
 
         _ = check_element_content(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]", "Approve Confirmed", 60)
         click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[2]")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     else:
         click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     result = check_element_content(driver, "/html/body/div[6]/div[3]/div[1]/h2", "All done", 60)
     if not result:
         # check again
@@ -896,15 +631,7 @@ def koi_finance(driver, user, option):
         driver.execute_script(
             """document.querySelector('body > w3m-modal').shadowRoot.querySelector('wui-flex > wui-card > w3m-router').shadowRoot.querySelector('div > w3m-connect-view').shadowRoot.querySelector('wui-flex > wui-list-wallet:nth-child(4)').click();""")
         time.sleep(1)
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
         logger.debug("connect")
     eth_address = "0x0000000000000000000000000000000000000000"
     usdt_address = "0x493257fd37edb34451f62edf8d2a0c418852ba4c"
@@ -926,17 +653,9 @@ def koi_finance(driver, user, option):
         input_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/div[2]/div[1]/div[1]/input", value_amount)
         _ = check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Swap", 20)
         click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
         
-        _ = check_element_content(driver, "/html/body/div/div/div/div[4]/div[6]/div/div[2]", "confirmed", 60)
+        _ = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
 
         # buy eth back
         driver.get("https://app.koi.finance/swap?"+"inputCurrency=" + coins[0] + "&outputCurrency="+eth_address)
@@ -944,44 +663,20 @@ def koi_finance(driver, user, option):
         click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/div[2]/div[1]/div[2]/div[2]/span") # Max
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Approve", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
-            okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+            okx_wallet_confirm(driver)
             try:
-                okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+                okx_wallet_confirm(driver)
             except:
                 pass
         
-            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[6]/div/div[2]", "confirmed", 60)
+            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
             return result
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Swap", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
-            okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+            okx_wallet_confirm(driver)
         
-            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[6]/div/div[2]", "confirmed", 60)
+            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
             return result
     else:
@@ -998,25 +693,9 @@ def koi_finance(driver, user, option):
         click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/div[2]/div[1]/div[2]/div[2]/span") # Max
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Approve", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
-            okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+            okx_wallet_confirm(driver)
             try:
-                okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+                okx_wallet_confirm(driver)
             except:
                 pass
         
@@ -1025,17 +704,9 @@ def koi_finance(driver, user, option):
             return result
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Swap", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
-            okxwallet_click(driver,
-                ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                        ],
-                30)
+            okx_wallet_confirm(driver)
         
-            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[6]/div/div[2]", "confirmed", 60)
+            result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
             return result
         
@@ -1054,15 +725,7 @@ def reactor_fusion_lending(driver, user, option):
         time.sleep(1)
         driver.execute_script(
             """document.querySelector('body > w3m-modal').shadowRoot.querySelector('wui-flex > wui-card > w3m-router').shadowRoot.querySelector('div > w3m-connect-view').shadowRoot.querySelector('wui-flex > wui-list-wallet:nth-child(3)').click();""")
-        okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-                    ],
-            30)
+        okx_wallet_confirm(driver)
     if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[3]/div[2]/div/div/div/button/div/span", "WRONG", 5):
         click(driver, "/html/body/div[1]/div/div[1]/div/div[3]/div[2]/div/div/div/button")
         driver.execute_script(
@@ -1078,16 +741,7 @@ def reactor_fusion_lending(driver, user, option):
     logger.debug("{} value amount".format(value_amount))
     input_content(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[3]/div/div[1]/div[2]/input", value_amount)
     click(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[3]/div/button")
-    okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-                    ],
-            30)
+    okx_wallet_confirm(driver)
     _ = check_element_content(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[2]/div[2]", "Pending", 30)
     click(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[1]/img")
     driver.get("https://main.reactorfusion.xyz/")
@@ -1096,175 +750,172 @@ def reactor_fusion_lending(driver, user, option):
     amount = float(fetch_content(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[3]/div/div[1]/div[1]/div/span")[:-3])
     input_content(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[3]/div/div[1]/div[2]/input", amount)
     click(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[3]/div/button")
-    okxwallet_click(driver,
-            ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-            "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-            "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-                    ],
-            30)
+    okx_wallet_confirm(driver)
     result = check_element_content(driver, "/html/body/div[2]/div/div/div/div[2]/section/div/div/div[2]/div[2]", "Pending", 30)
     logger.info("reactor_fusion_lending is {} for {}".format(result, user['acc_id']))
     return result
 
-# def pancake_swap(driver, user, option):
-#     password = option["password"]
-#     driver.switch_to.window(driver.window_handles[0])
-#     time.sleep(0.5)
-#     network = "zkSync"
-#     okx_connect_and_switch_network(driver, password, network)
-#     driver.get("https://pancakeswap.finance/swap?chain=zkSync")
-#     time.sleep(3)
-#     if check_element_content(driver, "/html/body/div[1]/div[1]/div[1]/nav/div[2]/button/div[1]", "Connect", 5):
-#         click(driver, "/html/body/div[1]/div[1]/div[1]/nav/div[2]/button")
-#         click(driver, "/html/body/div[2]/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]")
-#         okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
+def pancake_swap(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    network = "zkSync"
+    okx_connect_and_switch_network(driver, password, network)
+    driver.get("https://pancakeswap.finance/swap?chain=zkSync")
+    time.sleep(3)
+    if check_element_content(driver, "/html/body/div[1]/div[1]/div[1]/nav/div[2]/button/div[1]", "Connect", 5):
+        click(driver, "/html/body/div[1]/div[1]/div[1]/nav/div[2]/button")
+        click(driver, "/html/body/div[2]/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]")
+        okx_wallet_confirm(driver)
         
-#     # try to sell eth
-#     if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button/div/div", "ETH", 5):
-#         click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
-#         input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", "ETH")
-#         time.sleep(2)
-#         click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
-#     coins = ['USDC', 'USDT']
-#     random.shuffle(coins)
-#     retry = 6
-#     while retry > 0:
-#         if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]", "Loading", 5):
-#             time.sleep(5)
-#             retry -= 1
-#             logger.debug("wait for loading")
-#         else:
-#             break
-#     amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
-#     logger.debug("{} eth".format(amount))
-#     if amount > 0.01:
-#         logger.debug("Has enough eth to sell")
-#         gas_amount = round(random.uniform(0.001, 0.003), 6)
-#         logger.debug("{} gas amount".format(gas_amount))
-#         value_amount = round(amount - gas_amount, 5)
-#         logger.debug("{} value amount".format(value_amount))
-#         if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button/div/div", coins[0], 5):
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button")
-#             input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[0])
-#             time.sleep(2)
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div")
-#         input_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[2]/label/div[1]/input", value_amount)
-#         time.sleep(1)
-#         if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button", "Swap", 5):
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button")
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div[2]/button") # Confirm
-#             okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
+    # try to sell eth
+    if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button/div/div", "ETH", 5):
+        click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
+        input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", "ETH")
+        time.sleep(2)
+        click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
+    coins = ['USDC', 'USDT']
+    random.shuffle(coins)
+    retry = 6
+    while retry > 0:
+        if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]", "Loading", 5):
+            time.sleep(5)
+            retry -= 1
+            logger.debug("wait for loading")
+        else:
+            break
+    amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
+    logger.debug("{} eth".format(amount))
+    if amount > 0.01:
+        logger.debug("Has enough eth to sell")
+        gas_amount = round(random.uniform(0.001, 0.003), 6)
+        logger.debug("{} gas amount".format(gas_amount))
+        value_amount = round(amount - gas_amount, 5)
+        logger.debug("{} value amount".format(value_amount))
+        if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button/div/div", coins[0], 5):
+            click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button")
+            input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[0])
+            time.sleep(2)
+            click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div")
+        input_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[2]/label/div[1]/input", value_amount)
+        time.sleep(1)
+        if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button", "Swap", 5):
+            click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button")
+            click(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div[2]/button") # Confirm
+            okx_wallet_confirm(driver)
 
-#         time.sleep(10)
-#         # _ = check_element_content(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div", "receipt", 60)
-#         click(driver, "/html/body/div[2]/div/div/div[2]/div/div[1]/button/svg") # Return to swap
+        time.sleep(30)
+        driver.execute_script("document.body.style.overflow='visible';")
+        count = 5
+        while count:
+            amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[2]").split(":")[1])
+            if amount <= 0.0001:
+                count -= 1
+                time.sleep(3)
+            else:
+                break
+    driver.get("https://pancakeswap.finance/swap?chain=zkSync")
+    time.sleep(5)
+    click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
+    input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[0])
+    time.sleep(2)
+    click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
+    time.sleep(3)
+    amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
+    if amount < 0.01:
+        click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
+        input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[1])
+        time.sleep(2)
+        click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
+    time.sleep(3)
+    amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
+    if amount < 0.01:
+        logger.info("Not usdc or usdt to buy, pancake swap is False for {}".format(user['acc_id']))
+        return False
+    if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button/div/div", "ETH", 5):
+        click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button")
+        input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", "ETH")
+        time.sleep(2)
+        click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div")
+    click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[2]/label/div[3]/div/button[4]") # MAX
+    time.sleep(3)
+    if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button", "Swap", 10):
+        click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button")
+        click(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div[2]/button") # Confirm
+        okx_wallet_confirm(driver)
+    try:
+        okx_wallet_confirm(driver)
+    except:
+        pass
+    time.sleep(30)
+    driver.execute_script("document.body.style.overflow='visible';")
+    count = 5
+    while count:
+        amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
+        if amount <= 0.0001:      
+            logger.info("pancake swap is True for {}".format(user['acc_id']))
+            return True
+        else:
+            count -= 1
+            time.sleep(3)
+    logger.info("pancake swap is False for {}".format(user['acc_id']))
+    return False
 
-#         time.sleep(3)
-#         click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[2]/div/button") # Switch
-#         time.sleep(3)
-#         click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[2]/label/div[3]/div/button[4]") # MAX
-#         time.sleep(3)
-#         if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button", "Swap", 10):
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button")
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div[2]/button") # Confirm
-#             okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
-#         try:
-#             okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
-#         except:
-#             pass
-#         result = check_element_content(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div/div", "receipt", 60)
-#         logger.info("pancake swap is {} for {}".format(result, user['acc_id']))
-#         return result
-#     else:
-#         click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
-#         input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[0])
-#         time.sleep(2)
-#         click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
-#         time.sleep(3)
-#         amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
-#         if amount < 0.01:
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[1]/button")
-#             input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", coins[1])
-#             time.sleep(2)
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div[1]")
-#         time.sleep(3)
-#         amount = float(fetch_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[1]/div[2]").split(":")[1])
-#         if amount < 0.01:
-#             logger.info("Not usdc or usdt to buy, pancake swap is False for {}".format(user['acc_id']))
-#             return False
-#         if not check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button/div/div", "ETH", 5):
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[3]/div[1]/div[1]/button")
-#             input_content(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[1]/div[1]/input", "ETH")
-#             time.sleep(2)
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div")
-#         click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[1]/div[2]/label/div[3]/div/button[4]") # MAX
-#         time.sleep(3)
-#         if check_element_content(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button", "Swap", 10):
-#             click(driver, "/html/body/div[1]/div[1]/div[3]/div/div/div[1]/div/div/div/div/div/div[2]/div/div[5]/button")
-#             click(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div[2]/button") # Confirm
-#             okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
-#         try:
-#             okxwallet_click(driver,
-#             ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-#             "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-#             "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
-#                     ],
-#             30)
-#         except:
-#             pass
-#         result = check_element_content(driver, "/html/body/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div", "receipt", 60)
-#         logger.info("pancake swap is {} for {}".format(result, user['acc_id']))
-#         return result
+def rubyscore(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    network = "zkSync"
+    okx_connect_and_switch_network(driver, password, network)
+    driver.get("https://rubyscore.io/dashboard")
+    if check_element_content(driver, "/html/body/div[1]/main/div/div[1]/div/div[3]/button", "Connect", 10):
+        click(driver, "/html/body/div[1]/main/div/div[1]/div/div[3]/button")
+        click(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button")
+        okx_wallet_confirm(driver)
+
+    _ = check_element_content(driver, "/html/body/div[1]/main/div/div[1]/div/div[3]/div[1]/div/div[1]", "0x", 15)
+
+    if check_element_content(driver, "/html/body/div[1]/main/div/div[2]/div/div/div[1]/div[2]/div/div/div/div[1]/div/div[1]/div[1]/div[1]", "zkSync", 10):
+        click(driver, "/html/body/div[1]/main/div/div[2]/div/div/div[1]/div[2]/div/div/div/div[1]/div/div[1]/div[3]/div[1]/button")
+        okx_wallet_confirm(driver)
+        time.sleep(30)
+        logger.info("rubyscore is True for {}".format(user['acc_id']))
+        return True
+    
+    logger.info("rubyscore is False for {}".format(user['acc_id']))
+    return False
+
+def element_market_buy_one_nft(driver, user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    network = "zkSync"
+    okx_connect_and_switch_network(driver, password, network)
+    driver.get("https://element.market/collections/robots-farm-airdrop")
+
+    try:
+        click(driver, "/html/body/div[1]/header/div[2]/div[2]/div[7]")
+        time.sleep(1)
+        click(driver, "/html/body/div[3]/div[2]/div/div/div[2]/div[2]/div[5]")
+        okx_wallet_confirm(driver)
+    except:
+        pass
+    logger.debug("wallet connection")
+    if check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]/div/div[4]/div", "0.00001", 10):
+        logger.debug("try to click item")
+        card = driver.find_element('xpath', "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]")
+        actions = ActionChains(driver)
+        actions.move_to_element(card).perform()
+        click(driver, "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]/div/div[6]/button[1]")
+        logger.debug("click item")
+        if check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/button", "zkSync", 3):
+            click(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/button")
+        time.sleep(3)
+        okx_wallet_confirm(driver)
+
+        result = check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/div/button", "ok", 60)
+        result = check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/div/button", "わかった", 3)
+        logger.info("element_market_buy_one_nft is {} for {}".format(result, user['acc_id']))
+        return result
+    logger.info("element_market_buy_one_nft is False for {}".format(user['acc_id']))
+    return False

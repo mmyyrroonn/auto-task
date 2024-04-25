@@ -12,11 +12,11 @@ def load_users_list():
                                     user_id = file.readline().split('=')[1].rstrip()
                                     name = file.readline().split('=')[1]
                                     file.readline()
+                                    address_info = addresses.readline().rstrip()
+                                    mnemonic = open("../evm-metamask-seeds-using/{}.json".format(index), "r").readline().split(' ')
                                     discord_info = discord.readline()
                                     twitter_info = twitter.readline()
-                                    address_info = addresses.readline().rstrip()
                                     ok_addr = ok_address.readline().rstrip()
-                                    mnemonic = open("../evm-metamask-seeds-using/{}.json".format(index), "r").readline().split(' ')
                                     dym = open("../dym/{}.json".format(index+1), "r").readline().split(' ')
                                     dym_address_info = dym_addresses.readline().rstrip()
                                     google_account = google_accounts.readline()
@@ -31,5 +31,23 @@ def load_users_list():
                                                     "ok_addr": ok_addr,
                                                     "dym_address": dym_address_info,
                                                     "google_account": google_account})
+                                for index in range(50, 100):
+                                    acc_id = int(file.readline().split('=')[1].rstrip())
+                                    user_id = file.readline().split('=')[1].rstrip()
+                                    name = file.readline().split('=')[1]
+                                    file.readline()
+                                    address_info = addresses.readline().rstrip()
+                                    mnemonic = open("../evm-metamask-seeds-using/{}.json".format(index), "r").readline().split(' ')
+                                    # discord_info = discord.readline()
+                                    # twitter_info = twitter.readline()
+                                    # ok_addr = ok_address.readline().rstrip()
+                                    # dym = open("../dym/{}.json".format(index+1), "r").readline().split(' ')
+                                    # dym_address_info = dym_addresses.readline().rstrip()
+                                    # google_account = google_accounts.readline()
+                                    users_list.append({"acc_id": acc_id,
+                                                    "user_id": user_id,
+                                                    "name": int(name),
+                                                    "address": address_info,
+                                                    "mnemonic": mnemonic})
     print("Load user id list")
     return users_list

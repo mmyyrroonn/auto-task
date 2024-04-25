@@ -191,7 +191,7 @@ def metamask_click(driver, xpaths: [str], max_wait_time: int) -> bool:
                 element = driver.find_element('xpath', xpath)
                 logger.debug("check4")
                 consecutive_closures = 0
-                if element.is_displayed():
+                if(element and element.is_displayed()):
                     # Click on the element if it is displayed
                     element.click()
                     break
@@ -279,9 +279,12 @@ def found_okxwallet(driver):
     if not all_windows:
         return False
     for window in all_windows:
-        driver.switch_to.window(window)
-        if "OKX Wallet" in driver.title:
-            return True
+        try:
+            driver.switch_to.window(window)
+            if "OKX Wallet" in driver.title:
+                return True
+        except:
+            return False
     return False
 
 def input_password_and_unlock_okxwallet(driver, password):
@@ -314,7 +317,7 @@ def okxwallet_click(driver, xpaths: [str], max_wait_time: int) -> bool:
                 element = driver.find_element('xpath', xpath)
                 logger.debug("check4")
                 consecutive_closures = 0
-                if element.is_displayed():
+                if(element and element.is_displayed()):
                     # Click on the element if it is displayed
                     element.click()
                     break
@@ -347,3 +350,16 @@ def click_white_space(driver, x_coordinate = 10, y_coordinate = 10):
     script = f"document.elementFromPoint({x_coordinate}, {y_coordinate}).click();"
     driver.execute_script(script)
     time.sleep(1)
+
+def okx_wallet_confirm(driver):
+    okxwallet_click(driver,
+        ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+        "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+        "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+        "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+        "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
+        "/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Confirm
+        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
+        ],
+        30)

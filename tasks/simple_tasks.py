@@ -401,7 +401,7 @@ def nfp_daily_check(driver, _user, option):
     time.sleep(2)
     ### tricky solution for wallet connect
     driver.execute_script(
-    """document.querySelector('w3m-modal').shadowRoot.querySelector('w3m-modal-router').shadowRoot.querySelector('w3m-connect-wallet-view').shadowRoot.querySelector('w3m-desktop-wallet-selection').shadowRoot.querySelector('w3m-modal-footer').querySelector('div.w3m-grid').querySelector('w3m-wallet-button').shadowRoot.querySelector('button').click();""")
+    """document.querySelector('w3m-modal').shadowRoot.querySelector('wui-flex > wui-card > w3m-router').shadowRoot.querySelector('div > w3m-connect-view').shadowRoot.querySelector('wui-flex > wui-list-wallet:nth-child(4)').shadowRoot.querySelector('button').click();""")
     switch_to_okwallet(driver)
     input_password_and_unlock_okxwallet(driver, password)
     okxwallet_click(driver,
@@ -480,18 +480,19 @@ def okx_wallet_import(driver, user, option):
     driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html")
     time.sleep(2)
     # add sBTC
-    driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#manage-coin")
-    input_content(driver, "/html/body/div[1]/div/div/div/div[1]/div[2]/div/div/input[2]", "sBTC")
-    click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[1]/div[3]")
-    time.sleep(2)
+    # driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#manage-coin")
+    # input_content(driver, "/html/body/div[1]/div/div/div/div[1]/div[2]/div/div/input[2]", "sBTC")
+    # click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[1]/div[3]")
+    # time.sleep(2)
 
-    driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#coin?coinId=22900")
-    click(driver, "/html/body/div[1]/div/div/div/div[1]/div/div/div[3]/div")
-    click(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div/div[4]")
-    click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div[3]/div[3]/i")
-    logger.debug(user["name"])
-    clipboard_content = pyperclip.paste()
-    logger.debug(clipboard_content)
+    # driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#coin?coinId=22900")
+    # click(driver, "/html/body/div[1]/div/div/div/div[1]/div/div/div[3]/div")
+    # click(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div/div[4]")
+    # click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div[3]/div[3]/i")
+    # logger.debug(user["name"])
+    # clipboard_content = pyperclip.paste()
+    # logger.debug(clipboard_content)
+    print("import okx wallet success for {}".format(user["acc_id"]))
     return True
 
 def well3_daily_ai_mint(driver, user, option):

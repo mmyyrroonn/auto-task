@@ -26,12 +26,13 @@ from tasks.simple_tasks import (bera_drip, import_discord,
 from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb)
 from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
                           dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
-                          koi_finance, reactor_fusion_lending, pancake_swap)
+                          koi_finance, reactor_fusion_lending, pancake_swap, rubyscore, element_market_buy_one_nft)
 from tasks.secwarex import (init_connect_and_scan)
 from tasks.zeta_tasks import (zetahub_register)
 import random
 from task_manager import (DailyTaskManager, OnceTaskManager)
 from logger import logger
+from tinydb import TinyDB, Query
 
 # 加载 .env 文件
 load_dotenv()
@@ -223,9 +224,10 @@ class Executor:
         logger.info("Remaining tasks is {}".format(len(tasks)))
 
 executor = Executor(DailyTaskManager())
-executor.sequence_run_tasks(pancake_swap, {"password": password}, 2)
-# # executor.batch_run_tasks(well3_daily_ai_mint, {"password": password}, 10, 5)
+executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 46)
+# executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
 
+# executor = Executor(DailyTaskManager())
 # task_func_with_option_list = [(well3_daily_mint, {"password": password}, [x for x in range(1, 51)]),
 #                               (nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
 #                               (well3_daily_ai_mint, {"password": password}, [x for x in range(1, 51)]),
@@ -236,14 +238,17 @@ executor.sequence_run_tasks(pancake_swap, {"password": password}, 2)
 
 
 # once_executor = Executor(OnceTaskManager())
-# zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 51)]),
-#                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 51)]),
-#                               (mav_exchange, {"password": password}, [x for x in range(1, 51)]),
-#                               (tevaera_nft_mint, {"password": password}, [x for x in range(1, 51)]),
-#                               (dmail_send_message, {"password": password}, [x for x in range(1, 51)]),
-#                               (odos_exchange, {"password": password}, [x for x in range(1, 51)]),
-#                               (izumi_swap, {"password": password}, [x for x in range(1, 51)]),
-#                               (zero_land_lending, {"password": password}, [x for x in range(1, 51)]),
+# zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 101)]),
+#                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 101)]),
+#                               (mav_exchange, {"password": password}, [x for x in range(1, 101)]),
+#                               (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]),
+#                               (dmail_send_message, {"password": password}, [x for x in range(1, 101)]),
+#                               (odos_exchange, {"password": password}, [x for x in range(1, 101)]),
+#                               (izumi_swap, {"password": password}, [x for x in range(1, 101)]),
+#                               (zero_land_lending, {"password": password}, [x for x in range(1, 101)]),
+#                               (koi_finance, {"password": password}, [x for x in range(1, 101)]),
+#                               (reactor_fusion_lending, {"password": password}, [x for x in range(1, 101)]),
+#                               (pancake_swap, {"password": password}, [x for x in range(1, 101)]),
 #                               ]
 
 # once_executor.random_run_all_tasks(zksync_task_function_list, max_count=2, retry=1, human=True)
