@@ -22,7 +22,7 @@ fetch_content,input_content,
 clear_windows_and_resize,switch_to_metamask,
 check_element_content,input_password_and_unlock,
 metamask_click, switch_to_network, check_content_color,
-switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click)
+switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click, okx_wallet_confirm)
 #### import metamask
 
 def import_metamask(driver, mnemonic, password):
@@ -575,7 +575,9 @@ def ultiverse_daily_explore(driver, _user, option):
     time.sleep(0.5)
     driver.get("https://pilot.ultiverse.io")
     time.sleep(5)
+    logger.debug("open the page")
     if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[3]/div/button", "Connect", 3):
+        logger.debug("try to connect and click")
         click(driver, "/html/body/div[1]/div/div[1]/div/div/div/div[1]/div/div[3]/div/button")
         time.sleep(1)
         try:
@@ -583,18 +585,15 @@ def ultiverse_daily_explore(driver, _user, option):
             time.sleep(1)
         except:
             pass
-        switch_to_okwallet(driver)
+        # switch_to_okwallet(driver)
         # input_password_and_unlock(driver, password)
         time.sleep(1)
-        okxwallet_click(driver,
-                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                    ],
-                    30)
+        okx_wallet_confirm(driver)
         time.sleep(3)
+    try:
+        okx_wallet_confirm(driver)
+    except:
+        pass
     # if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div[2]/div[5]/button", "Join", 5):
     # 使用JavaScript来模拟点击
     x_coordinate = 10  # 替换为你想点击的X坐标
@@ -610,7 +609,7 @@ def ultiverse_daily_explore(driver, _user, option):
     time.sleep(0.5)
     time.sleep(1)
     try:
-        if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div[2]/button", "exploring", 5):
+        if check_element_content(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[1]/div[5]/div[2]/button", "exploring", 5):
             logger.info("ultiverse daily explore {}".format("True"))
             return True
     except:
@@ -624,12 +623,12 @@ def ultiverse_daily_explore(driver, _user, option):
         pass
     time.sleep(1)
     logger.debug("explore_count is {}".format(explore_count))
-    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div[1]/div[5]/div[2]/button")
+    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[1]/div[5]/div[2]/button")
     # for i in range(min(explore_count, 5)):
     #     click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[2]/div[{}]/div[5]/div[2]/button".format(str(i+1)))
     #     time.sleep(0.5)
     time.sleep(1)
-    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[4]/div/div[2]/button")
+    click(driver, "/html/body/div[1]/div/div[1]/div/div/div[1]/div/div[2]/div/div[3]/div/div[2]/button")
     click(driver, "/html/body/div[3]/div/div/div[3]/button")
     okxwallet_click(driver,
                 ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect

@@ -160,12 +160,16 @@ class OnceTaskManager:
         if search_result:
             # Step 1: Sort the search_result by date (assuming each item in search_result is an instance of Task)
             search_result.sort(key=lambda task: task.get('date'), reverse=True) # Sorts in descending order, most recent first
+            status = search_result[0].get('completed', False)
+            if not status:
+                return False
 
             most_recent_date = parse_date(search_result[0].get('date'))
 
             # Step 3: Compare with today's date
             today = parse_date(todaystring)
             delta_days = (today - most_recent_date).days
+
             if delta_days < self.wait_day:
                 return True
             else:

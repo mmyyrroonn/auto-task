@@ -70,11 +70,13 @@ def switch_to_network(driver, user, option):
     driver.switch_to.window(driver.window_handles[0])
 
 def click(driver, xpath):
+    logger.debug("click {}".format(xpath))
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
     time.sleep(0.5)
     
 def fetch_content(driver, xpath):
     text = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath))).text
+    logger.debug("fetch_content text is  {}".format(text))
     time.sleep(0.5)
     return text
 
@@ -126,6 +128,7 @@ def check_element_content(driver, xpath: str, content: str, max_wait_time: int) 
             # Find the element using the provided XPath
             element = driver.find_element('xpath', xpath)
             # If the element's text matches the expected content, return True
+            logger.debug("check_element_content text is {}".format(element.text))
             if content in element.text:
                 return True
         except NoSuchElementException:
@@ -340,8 +343,8 @@ def okx_connect_and_switch_network(driver, password, network):
     driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#home")
     input_password_and_unlock_okxwallet(driver, password)
     driver.get("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/home.html#connect-site")
-    if not check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/span/div/span", network, 5):
-        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/span/div/span")
+    if not check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/div[2]/div/span", network, 5):
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/div[2]/div/span")
         input_content(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div[1]/div/input[2]", network)
         time.sleep(3)
         click(driver, "/html/body/div[1]/div/div/div[3]/div/div[3]/div/div/div[2]/div[2]/div[2]/span")
@@ -359,7 +362,5 @@ def okx_wallet_confirm(driver):
         "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
         "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
         "/html/body/div[1]/div/div/div/div[5]/div/button[2]", # Confirm
-        "/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Confirm
-        "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm with gas change
         ],
         30)

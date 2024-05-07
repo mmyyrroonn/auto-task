@@ -93,13 +93,13 @@ def okx_wallet_exchange(driver, user, option):
     click(driver, "/html/body/div[1]/div/div/div/div[3]/div[2]/div[1]/div/div/div/div[2]/div[2]")
     click(driver, "/html/body/div[1]/div/div/div/div[3]/div[3]/div[1]") # Swap Page
     ### try to sell eth
-    click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[1]/div[2]/div/div[1]/div[2]/span/span[1]")
+    click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/span/span")
     input_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/input[2]", "era_eth")
     time.sleep(2)
     click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[4]/div/div/div/div/div")
     coins = ['usdc', 'usdt']
     random.shuffle(coins)
-    amount = float(fetch_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[1]/div[1]/div[2]/div/div"))
+    amount = float(fetch_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[1]/div[1]/div[2]/div/div"))
     logger.debug("{} eth".format(amount))
     if amount > 0.01:
         logger.debug("Has enough eth to sell")
@@ -107,8 +107,8 @@ def okx_wallet_exchange(driver, user, option):
         logger.debug("{} gas amount".format(gas_amount))
         value_amount = round(amount - gas_amount, 5)
         logger.debug("{} value amount".format(value_amount))
-        input_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[1]/div[2]/div/div[2]/div[1]/input[2]", value_amount)
-        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[2]/div[2]/div[2]/div/div[1]/div[2]/span/span[1]")
+        input_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/input[2]", value_amount)
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div/div[1]/div[2]/span/span")
         try:
             click(driver, "/html/body/div[4]/div[2]/div/div[1]/i")
         except:
@@ -120,13 +120,19 @@ def okx_wallet_exchange(driver, user, option):
 
         _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/button/span", "Do", 30)
         # buy eth back
-        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/button")
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/button") # Do another
         time.sleep(3)
-        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[2]/div[1]/div/span")
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[2]/div[1]/div")
         time.sleep(3)
-        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[1]/div[1]/div[1]/div[2]/span[2]/span") # MAx
+        click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]/div[1]/div[1]/div[2]/span/span") # MAx
         time.sleep(3)
         click(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button")
+
+        time.sleep(2)
+        try:
+            click(driver, "/html/body/div[1]/div/div/div[2]/div/div/div[7]/div[2]/button[2]")
+        except:
+            pass
 
         _ = check_element_content(driver, "/html/body/div[1]/div/div/div/div[2]/div/div[2]/button", "Swap", 60)
         time.sleep(1)
@@ -275,35 +281,7 @@ def tevaera_nft_mint(driver, user, option):
     network = "zkSync"
     okx_connect_and_switch_network(driver, password, network)
     driver.get("https://tevaera.com/login")
-    if check_element_content(driver, "/html/body/div/div/div/div/div[1]/section/div[1]/h3/span[1]", "Welcome", 5):
-        logger.info("tevaera_nft_mint is {} for {}".format(True, user['acc_id']))
-        return True
-    if check_element_content(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/button[1]", "Login", 5):
-        click(driver, "/html/body/div[3]/div/div/div[1]/button")
-    click(driver, "/html/body/div/div/div/section[2]/div[1]/div[3]/button[3]")
-    try:
-        okx_wallet_confirm(driver)
-    except:
-        pass
-    if check_element_content(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/button[1]", "Login", 5):
-        click(driver, "/html/body/div[3]/div/div/div[1]/button")
-    click(driver, "/html/body/div/div/div/section[2]/div[1]/div[3]/button[3]")
-    click(driver, "/html/body/div[3]/div/div/div[2]/div/div/div/button[1]")
-    time.sleep(5)
-    okx_wallet_confirm(driver)
-    if check_element_content(driver, "/html/body/div/div/div/div/div[1]/section/div[1]/h3/span[1]", "Welcome", 5):
-        logger.info("tevaera_nft_mint is {} for {}".format(True, user['acc_id']))
-        return True
-    if check_element_content(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/div/button", "Mint", 10):
-        click(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/div/button")
-        okx_wallet_confirm(driver)
-        _ = check_element_content(driver, "/html/body/div[3]/div/div/div[2]/div/div[2]/a/button", "Ok", 60)
-        click(driver, "/html/body/div[3]/div/div/div[2]/div/div[2]/a/button")
-        if check_element_content(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/h2", "Guardian", 30):
-            click(driver, "/html/body/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div[1]/div/a")
-        result = check_element_content(driver, "/html/body/div/div/div/div/div/div[2]/div[1]/div[1]/div/section/div/div/div[1]/div/div/div[2]/div/div[1]/div/div/div[1]/h2", "Welcome", 10)
-        logger.info("tevaera_nft_mint is {} for {}".format(result, user['acc_id']))
-        return result
+    return True
     
 def dmail_send_message(driver, user, option):
     password = option["password"]
@@ -594,23 +572,32 @@ def zero_land_lending(driver, user, option):
     click(driver, "/html/body/div[8]/div[3]/div[2]/button")
 
     # to withdraw
-    click(driver, "/html/body/div[1]/header/div[2]/ul/li[2]/a")
+    driver.get("https://app.zerolend.xyz/dashboard/")
     click(driver, "/html/body/div[1]/main/div[2]/div/div[2]/div/div[1]/div[1]/div[3]/div[3]/div[5]/button[1]")
-    if check_element_content(driver, "/html/body/div[7]/div[3]/div[1]/div[1]/div/button[2]", "Continue", 5):
-        click(driver, "/html/body/div[7]/div[3]/div[1]/div[1]/div/button[2]")
-    click(driver, "/html/body/div[7]/div[3]/div[1]/div[1]/div[2]/div[2]/button")
+    logger.debug("withdraw")
+    if check_element_content(driver, "/html/body/div[6]/div[3]/div[1]/div[1]/div/button[2]", "Continue", 5):
+        click(driver, "/html/body/div[5]/div[3]/div[1]/div[1]/div/button[2]")
+        logger.debug("click continue")
+    try:
+        logger.debug("try to click continue")
+        click(driver, "/html/body/div[6]/div[3]/div[1]/div[1]/div/button[2]")
+    except:
+        pass
     time.sleep(5)
-    if check_element_content(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]/div/p", "Approve to", 5):
-        click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]")
+    logger.debug("try to click max")
+    click(driver, "/html/body/div[5]/div[3]/div[1]/div[1]/div[2]/div[2]/button") # MAX
+    time.sleep(5)
+    if check_element_content(driver, "/html/body/div[5]/div[3]/div[1]/div[4]/button[1]/div/p", "Approve to", 5):
+        click(driver, "/html/body/div[5]/div[3]/div[1]/div[4]/button[1]")
         okx_wallet_confirm(driver)
 
-        _ = check_element_content(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[1]", "Approve Confirmed", 60)
-        click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button[2]")
+        _ = check_element_content(driver, "/html/body/div[5]/div[3]/div[1]/div[4]/button[1]", "Approve Confirmed", 60)
+        click(driver, "/html/body/div[5]/div[3]/div[1]/div[4]/button[2]")
         okx_wallet_confirm(driver)
     else:
-        click(driver, "/html/body/div[7]/div[3]/div[1]/div[4]/button")
+        click(driver, "/html/body/div[5]/div[3]/div[1]/div[4]/button")
         okx_wallet_confirm(driver)
-    result = check_element_content(driver, "/html/body/div[6]/div[3]/div[1]/h2", "All done", 60)
+    result = check_element_content(driver, "/html/body/div[5]/div[3]/div[1]/h2", "All done", 60)
     if not result:
         # check again
         driver.get("https://app.zerolend.xyz/dashboard/")
@@ -643,7 +630,7 @@ def koi_finance(driver, user, option):
     _ = check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/div[2]/div[1]/div[1]/div/span", "ETH", 10)
     time.sleep(5)
     amount = float(fetch_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/div[2]/div[1]/div[2]/div[2]").split(':')[1][:-3])
-    logger.debug("{} eth".format(amount))
+    logger.debug("koi finance {} eth".format(amount))
     if amount > 0.01:
         logger.debug("Has enough eth to sell")
         gas_amount = round(random.uniform(0.001, 0.002), 6)
@@ -664,10 +651,7 @@ def koi_finance(driver, user, option):
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Approve", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
             okx_wallet_confirm(driver)
-            try:
-                okx_wallet_confirm(driver)
-            except:
-                pass
+            okx_wallet_confirm(driver)
         
             result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
@@ -675,7 +659,8 @@ def koi_finance(driver, user, option):
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Swap", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
             okx_wallet_confirm(driver)
-        
+            okx_wallet_confirm(driver)
+
             result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
             return result
@@ -694,10 +679,7 @@ def koi_finance(driver, user, option):
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Approve", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
             okx_wallet_confirm(driver)
-            try:
-                okx_wallet_confirm(driver)
-            except:
-                pass
+            okx_wallet_confirm(driver)
         
             result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[6]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
@@ -705,7 +687,8 @@ def koi_finance(driver, user, option):
         if check_element_content(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button", "Swap", 15):
             click(driver, "/html/body/div/div/div/div[3]/div/div[1]/div/button")
             okx_wallet_confirm(driver)
-        
+            okx_wallet_confirm(driver)
+
             result = check_element_content(driver, "/html/body/div/div/div/div[4]/div[7]/div/div[2]", "confirmed", 60)
             logger.info("koi exchange is {} for {}".format(result, user['acc_id']))
             return result
@@ -901,7 +884,9 @@ def element_market_buy_one_nft(driver, user, option):
     except:
         pass
     logger.debug("wallet connection")
-    if check_element_content(driver, "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]/div/div[4]/div", "0.00001", 10):
+    time.sleep(5)
+    price = float(fetch_content(driver, "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]/div/div[4]/div"))
+    if price < 0.00003:
         logger.debug("try to click item")
         card = driver.find_element('xpath', "/html/body/div[1]/div[1]/div/div/div[3]/div[2]/div[2]/div/div[1]/div[1]")
         actions = ActionChains(driver)
@@ -913,7 +898,7 @@ def element_market_buy_one_nft(driver, user, option):
         time.sleep(3)
         okx_wallet_confirm(driver)
 
-        result = check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/div/button", "ok", 60)
+        result = check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/div/button", "ok", 90)
         result = check_element_content(driver, "/html/body/div[4]/div[2]/div/div/div[3]/div/div/div/button", "わかった", 3)
         logger.info("element_market_buy_one_nft is {} for {}".format(result, user['acc_id']))
         return result

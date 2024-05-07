@@ -23,7 +23,8 @@ from tasks.simple_tasks import (bera_drip, import_discord,
                    okx_wallet_import, well3_daily_ai_mint,
                    ultiverse_daily_explore, google_login,
                    transfer_eth_to_ok_coin, palio_daily, sub_wallet_import)
-from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb)
+from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
+                                 well3_nft_open)
 from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
                           dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
                           koi_finance, reactor_fusion_lending, pancake_swap, rubyscore, element_market_buy_one_nft)
@@ -223,25 +224,25 @@ class Executor:
         tasks = self.task_manager.build_task_list(self.users_list, task_func_with_option_list)
         logger.info("Remaining tasks is {}".format(len(tasks)))
 
-executor = Executor(DailyTaskManager())
-executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 46)
+# executor = Executor(DailyTaskManager())
+# executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 90)
 # executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
 
 # executor = Executor(DailyTaskManager())
-# task_func_with_option_list = [(well3_daily_mint, {"password": password}, [x for x in range(1, 51)]),
-#                               (nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
-#                               (well3_daily_ai_mint, {"password": password}, [x for x in range(1, 51)]),
-#                               (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)]),
-#                               (well3_daily, None, [x for x in range(1, 51)]),
-#                               (palio_daily, {"password": password}, [x for x in range(1, 9)])]
-# executor.random_run_all_tasks(task_func_with_option_list)
+# task_func_with_option_list = [(well3_nft_open, {"password": password}, [x for x in range(1, 51)])]
+# executor.random_run_all_tasks(task_func_with_option_list,max_count=2, retry=2)
 
+executor = Executor(DailyTaskManager())
+task_func_with_option_list = [(nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
+                              (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)])
+                              ]
+executor.random_run_all_tasks(task_func_with_option_list)
 
 # once_executor = Executor(OnceTaskManager())
 # zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 101)]),
 #                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 101)]),
 #                               (mav_exchange, {"password": password}, [x for x in range(1, 101)]),
-#                               (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]),
+#                             #   (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]), #TODO:直接改成合约交互mint第二个
 #                               (dmail_send_message, {"password": password}, [x for x in range(1, 101)]),
 #                               (odos_exchange, {"password": password}, [x for x in range(1, 101)]),
 #                               (izumi_swap, {"password": password}, [x for x in range(1, 101)]),
@@ -249,6 +250,8 @@ executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 
 #                               (koi_finance, {"password": password}, [x for x in range(1, 101)]),
 #                               (reactor_fusion_lending, {"password": password}, [x for x in range(1, 101)]),
 #                               (pancake_swap, {"password": password}, [x for x in range(1, 101)]),
+#                               (rubyscore, {"password": password}, [x for x in range(1, 101)]),
+#                               (element_market_buy_one_nft, {"password": password}, [x for x in range(1, 101)]),
 #                               ]
 
-# once_executor.random_run_all_tasks(zksync_task_function_list, max_count=2, retry=1, human=True)
+# once_executor.random_run_all_tasks(zksync_task_function_list, max_count=3, retry=1, human=True)

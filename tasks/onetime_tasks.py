@@ -307,4 +307,67 @@ def bridge_usdc_to_arb(driver, user, option):
     result = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/div/span[1]/span/span/span[1]", "Complete", 120)
     logger.info("bridge usdc is {} for {}".format(result, user['acc_id']))
     return result
-    
+
+
+def well3_nft_open(driver, _user, option):
+    password = option["password"]
+    driver.switch_to.window(driver.window_handles[0])
+    time.sleep(0.5)
+    driver.get("https://well3.com/mission")
+    try:
+        click(driver, "/html/body/div/button")
+    except:
+        pass
+    click(driver, "/html/body/div/div[1]/header/div/div[1]/a/div/img") # click start
+    click(driver, "/html/body/div/div[2]/div/div[2]/div/div/div[1]/div/nav/ol/li[5]/a/span") # click master's wisdom
+    click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # connect wallet
+    click(driver, "/html/body/div[2]/div/div/div[2]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button/div/div/div[2]") # click metamask
+    switch_to_okwallet(driver)
+    input_password_and_unlock_okxwallet(driver, password)
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+    time.sleep(1)
+    driver.switch_to.window(driver.window_handles[0])
+    if check_element_content(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button", "Link", 3):
+        click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # Link
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+        time.sleep(2)
+        driver.switch_to.window(driver.window_handles[0])
+    if check_element_content(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button", "Switch", 3):
+        click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/button") # Switch
+        okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+        time.sleep(2)
+        driver.switch_to.window(driver.window_handles[0])
+    click(driver, "/html/body/div/div[1]/main/div/div[2]/div[1]/div[5]/div[1]/div[1]") # free
+    click(driver, "/html/body/div/div[1]/div[4]/div/div/div/div/div") # mint
+    okxwallet_click(driver,
+                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
+                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
+                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
+                    ],
+                    30)
+    time.sleep(2)
+    logger.info("well3 open mint success")
+    return True
