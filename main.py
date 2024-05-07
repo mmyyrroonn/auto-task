@@ -15,21 +15,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import pyautogui  #<== need this to click on extension
 from basic_operator import click,fetch_content,input_content,clear_windows_and_resize
 from data_manager import load_users_list
-from tasks.simple_tasks import (bera_drip, import_discord,
+from tasks.simple_tasks import (import_discord,
                    import_twitter, follow_users,
-                   import_unisat, well3_daily, qna3_daily,
-                   daily_bera_galxe_point, well3_daily_mint,
-                   nfp_daily_check, test_daily, keplr_import,
-                   okx_wallet_import, well3_daily_ai_mint,
+                   nfp_daily_check, test_daily,
                    ultiverse_daily_explore, google_login,
-                   transfer_eth_to_ok_coin, palio_daily, sub_wallet_import)
+                   transfer_eth_to_ok_coin)
+from tasks.wallets import (import_unisat,keplr_import,okx_wallet_import,sub_wallet_import, import_metamask)
 from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
                                  well3_nft_open)
 from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
                           dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
                           koi_finance, reactor_fusion_lending, pancake_swap, rubyscore, element_market_buy_one_nft)
-from tasks.secwarex import (init_connect_and_scan)
-from tasks.zeta_tasks import (zetahub_register)
 import random
 from task_manager import (DailyTaskManager, OnceTaskManager)
 from logger import logger

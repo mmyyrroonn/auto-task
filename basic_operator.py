@@ -59,14 +59,7 @@ def switch_to_network(driver, user, option):
     click(driver, "/html/body/div[1]/div/div[2]/div[2]/button")
     switch_to_okwallet(driver)
     input_password_and_unlock_okxwallet(driver, password)
-    okxwallet_click(driver,
-                    ["/html/body/div[1]/div/div/div/div/div[5]/div[2]/button[2]", # Connect
-                     "/html/body/div[1]/div/div/div/div[2]/div/div[7]/div[2]/button[2]", # Fill up GLMR
-                     "/html/body/div[1]/div/div/div/div/div/div[7]/div[2]/button[2]", # Confirm
-                     "/html/body/div[1]/div/div/div/div/div/div[5]/div/button[2]", # Confirm
-                     "/html/body/div[1]/div/div/div/div/div/div[7]/div/button[2]", # Confirm
-                    ],
-                    30)
+    okx_wallet_confirm(driver)
     driver.switch_to.window(driver.window_handles[0])
 
 def click(driver, xpath):
