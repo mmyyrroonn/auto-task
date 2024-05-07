@@ -17,7 +17,7 @@ import time
 from basic_operator import (
 click, fetch_attribute,
 fetch_content,input_content,
-clear_windows_and_resize,switch_to_metamask,
+clear_windows_and_resize,
 check_element_content,input_password_and_unlock,
 metamask_click, switch_to_network, switch_to_page,
 switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click)
@@ -307,7 +307,6 @@ def bridge_usdc_to_arb(driver, user, option):
     result = check_element_content(driver, "/html/body/div/div/main/section/div[2]/div/div/div[2]/div/span[1]/span/span/span[1]", "Complete", 120)
     logger.info("bridge usdc is {} for {}".format(result, user['acc_id']))
     return result
-
 
 def well3_nft_open(driver, _user, option):
     password = option["password"]
