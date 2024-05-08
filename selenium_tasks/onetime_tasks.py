@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
-from logger import logger
+from loguru import logger
 import pyperclip
 import random
 import pyautogui  #<== need this to click on extension
@@ -21,7 +21,7 @@ clear_windows_and_resize,
 check_element_content,input_password_and_unlock,
 metamask_click, switch_to_network, switch_to_page,
 switch_to_okwallet, input_password_and_unlock_okxwallet, okxwallet_click)
-from tasks.simple_tasks import follow_user
+from selenium_tasks.simple_tasks import follow_user
 
 def bitcraft_register(driver, user, option):
     driver.switch_to.window(driver.window_handles[0])

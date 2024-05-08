@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
-from logger import logger
+from loguru import logger
 import pyperclip
 import random
 import pyautogui  #<== need this to click on extension

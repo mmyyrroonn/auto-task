@@ -1,8 +1,8 @@
 import random
 from datetime import datetime
 from tinydb import TinyDB, Query
-from logger import logger
-from util import parse_date
+from loguru import logger
+from utils.general import parse_date
 
 class DailyTaskManager:
     def __init__(self) -> None:

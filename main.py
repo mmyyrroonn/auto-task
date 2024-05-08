@@ -15,21 +15,38 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import pyautogui  #<== need this to click on extension
 from basic_operator import click,fetch_content,input_content,clear_windows_and_resize
 from data_manager import load_users_list
-from tasks.simple_tasks import (import_discord,
+from selenium_tasks.simple_tasks import (import_discord,
                    import_twitter, follow_users,
                    nfp_daily_check, test_daily,
                    ultiverse_daily_explore, google_login,
                    transfer_eth_to_ok_coin)
-from tasks.wallets import (import_unisat,keplr_import,okx_wallet_import,sub_wallet_import, import_metamask)
-from tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
+from selenium_tasks.wallets import (import_unisat,keplr_import,okx_wallet_import,sub_wallet_import, import_metamask)
+from selenium_tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
                                  well3_nft_open)
-from tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
+from selenium_tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
                           dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
                           koi_finance, reactor_fusion_lending, pancake_swap, rubyscore, element_market_buy_one_nft)
 import random
 from task_manager import (DailyTaskManager, OnceTaskManager)
-from logger import logger
+from loguru import logger
 from tinydb import TinyDB, Query
+import asyncio
+import random
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from utils.sleeping import sleep
+from settings import (
+    RANDOM_WALLET,
+    SLEEP_TO,
+    SLEEP_FROM,
+    QUANTITY_THREADS,
+    THREAD_SLEEP_FROM,
+    THREAD_SLEEP_TO,
+    SAVE_LOGS,
+    CHECK_QUESTS_PROGRESS
+)
+from contract_modules.zksync import tevaera_nft_mint
 
 # 加载 .env 文件
 load_dotenv()
@@ -220,34 +237,56 @@ class Executor:
         tasks = self.task_manager.build_task_list(self.users_list, task_func_with_option_list)
         logger.info("Remaining tasks is {}".format(len(tasks)))
 
-# executor = Executor(DailyTaskManager())
-# executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 90)
-# executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
+async def run_module(module, wallet_data):
+    try:
+        await module(wallet_data)
+    except Exception as e:
+        logger.error(e)
+        import traceback
 
-# executor = Executor(DailyTaskManager())
-# task_func_with_option_list = [(well3_nft_open, {"password": password}, [x for x in range(1, 51)])]
-# executor.random_run_all_tasks(task_func_with_option_list,max_count=2, retry=2)
+        traceback.print_exc()
 
-executor = Executor(DailyTaskManager())
-task_func_with_option_list = [(nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
-                              (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)])
-                              ]
-executor.random_run_all_tasks(task_func_with_option_list)
+    await sleep(SLEEP_FROM, SLEEP_TO)
 
-# once_executor = Executor(OnceTaskManager())
-# zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 101)]),
-#                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 101)]),
-#                               (mav_exchange, {"password": password}, [x for x in range(1, 101)]),
-#                             #   (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]), #TODO:直接改成合约交互mint第二个
-#                               (dmail_send_message, {"password": password}, [x for x in range(1, 101)]),
-#                               (odos_exchange, {"password": password}, [x for x in range(1, 101)]),
-#                               (izumi_swap, {"password": password}, [x for x in range(1, 101)]),
-#                               (zero_land_lending, {"password": password}, [x for x in range(1, 101)]),
-#                               (koi_finance, {"password": password}, [x for x in range(1, 101)]),
-#                               (reactor_fusion_lending, {"password": password}, [x for x in range(1, 101)]),
-#                               (pancake_swap, {"password": password}, [x for x in range(1, 101)]),
-#                               (rubyscore, {"password": password}, [x for x in range(1, 101)]),
-#                               (element_market_buy_one_nft, {"password": password}, [x for x in range(1, 101)]),
-#                               ]
 
-# once_executor.random_run_all_tasks(zksync_task_function_list, max_count=3, retry=1, human=True)
+def _async_run_module(module, wallet_data):
+    asyncio.run(run_module(module, wallet_data))
+
+
+if __name__ == '__main__':
+
+    # users_list = load_users_list()
+
+    # _async_run_module(tevaera_nft_mint, users_list[85])
+
+    # executor = Executor(DailyTaskManager())
+    # executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 90)
+    # executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
+
+    # executor = Executor(DailyTaskManager())
+    # task_func_with_option_list = [(well3_nft_open, {"password": password}, [x for x in range(1, 51)])]
+    # executor.random_run_all_tasks(task_func_with_option_list,max_count=2, retry=2)
+
+    executor = Executor(DailyTaskManager())
+    task_func_with_option_list = [(nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
+                                  (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)])
+                                  ]
+    executor.random_run_all_tasks(task_func_with_option_list)
+
+    # once_executor = Executor(OnceTaskManager())
+    # zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 101)]),
+    #                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 101)]),
+    #                               (mav_exchange, {"password": password}, [x for x in range(1, 101)]),
+    #                             #   (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]), #TODO:直接改成合约交互mint第二个
+    #                               (dmail_send_message, {"password": password}, [x for x in range(1, 101)]),
+    #                               (odos_exchange, {"password": password}, [x for x in range(1, 101)]),
+    #                               (izumi_swap, {"password": password}, [x for x in range(1, 101)]),
+    #                               (zero_land_lending, {"password": password}, [x for x in range(1, 101)]),
+    #                               (koi_finance, {"password": password}, [x for x in range(1, 101)]),
+    #                               (reactor_fusion_lending, {"password": password}, [x for x in range(1, 101)]),
+    #                               (pancake_swap, {"password": password}, [x for x in range(1, 101)]),
+    #                               (rubyscore, {"password": password}, [x for x in range(1, 101)]),
+    #                               (element_market_buy_one_nft, {"password": password}, [x for x in range(1, 101)]),
+    #                               ]
+    # TODO: 支持两种任务类别 拆分 分别给不同的执行器
+    # once_executor.random_run_all_tasks(zksync_task_function_list, max_count=3, retry=1, human=True)

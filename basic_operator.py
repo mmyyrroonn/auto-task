@@ -12,7 +12,7 @@ from selenium.common.exceptions import (NoSuchElementException,
                                         ElementClickInterceptedException,
                                         WebDriverException)
 import time
-from logger import logger
+from loguru import logger
 
 def wait_for_continue(user):
     while True:
