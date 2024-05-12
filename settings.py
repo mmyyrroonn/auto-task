@@ -7,8 +7,8 @@ USE_PROXY = True
 
 CHECK_QUESTS_PROGRESS = True
 
-SLEEP_FROM = 500  # Second
-SLEEP_TO = 800  # Second
+SLEEP_FROM = 50  # Second
+SLEEP_TO = 80  # Second
 
 # Sleep after a transaction has been executed. Blocks threads so that wallets do not make a transaction in 1 second.
 SLEEP_AFTER_TX_FROM = 60

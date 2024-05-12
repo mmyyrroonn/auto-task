@@ -5,6 +5,7 @@ from loguru import logger
 from utils.gas_checker import check_gas
 from utils.helpers import retry
 from .account import Account
+from config import TEVAERA_ABI
 
 
 class Zksync(Account):
@@ -15,13 +16,22 @@ class Zksync(Account):
     async def tevaera_nft_mint(self):
         logger.info(f"[{self.account_id}][{self.address}] mint tevaera nft")
 
-        contract = "0xd29Aa7bdD3cbb32557973daD995A3219D307721f"
+        contract_address = "0xd29Aa7bdD3cbb32557973daD995A3219D307721f"
+
+        contract_address = self.w3.to_checksum_address(contract_address)
+        contract = self.get_contract(contract_address, abi=TEVAERA_ABI)
+
+        balance_wei = await contract.functions.balanceOf(self.address).call()
+
+        if balance_wei > 0:
+            logger.info("tevaera_nft_mint is already minted")
+            return True
 
         data = "0xfefe409d"
         amount = self.w3.to_wei(0.0003, "ether")
         tx_data = await self.get_tx_data(value=amount)
         tx_data.update(
-            {"data": data, "to": self.w3.to_checksum_address(contract)}
+            {"data": data, "to": contract_address}
         )
 
         signed_txn = await self.sign(tx_data)
@@ -31,11 +41,3 @@ class Zksync(Account):
         await self.wait_until_tx_finished(txn_hash.hex())
 
         return True
-    
-async def tevaera_nft_mint(wallet_info):
-    """
-    Task 3
-    """
-
-    zksync_inst = Zksync(wallet_info)
-    return await zksync_inst.tevaera_nft_mint()

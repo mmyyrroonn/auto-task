@@ -12,6 +12,9 @@ with open('data/rpc.json') as file:
 with open('data/abi/erc20_abi.json') as file:
     ERC20_ABI = json.load(file)
 
+with open('data/abi/tevaera/abi.json') as file:
+    TEVAERA_ABI = json.load(file)
+
 with open("data/abi/dmail/abi.json", "r") as file:
     DMAIL_ABI = json.load(file)
 

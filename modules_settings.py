@@ -174,6 +174,11 @@ async def withdraw_layerbank(wallet_info):
 
     layerbank_inst = LayerBank(wallet_info)
     await layerbank_inst.withdraw(required_amount_for_withdraw)
+
+async def tevaera_nft_mint(wallet_info, _option):
+
+    zksync_inst = Zksync(wallet_info)
+    return await zksync_inst.tevaera_nft_mint()
 ########################################################################
 #                             Checker                                  #
 ########################################################################

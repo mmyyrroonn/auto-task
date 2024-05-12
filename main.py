@@ -13,17 +13,17 @@ import requests
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pyautogui  #<== need this to click on extension
-from basic_operator import click,fetch_content,input_content,clear_windows_and_resize
+from selenium_modules.basic_operator import click,fetch_content,input_content,clear_windows_and_resize
 from data_manager import load_users_list
-from selenium_tasks.simple_tasks import (import_discord,
+from selenium_modules.simple_tasks import (import_discord,
                    import_twitter, follow_users,
                    nfp_daily_check, test_daily,
                    ultiverse_daily_explore, google_login,
-                   transfer_eth_to_ok_coin)
-from selenium_tasks.wallets import (import_unisat,keplr_import,okx_wallet_import,sub_wallet_import, import_metamask)
-from selenium_tasks.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
-                                 well3_nft_open)
-from selenium_tasks.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange, tevaera_nft_mint,
+                   transfer_eth_to_ok_coin, polykemon_point)
+from selenium_modules.wallets import (import_unisat,keplr_import,okx_wallet_import,sub_wallet_import, import_metamask)
+from selenium_modules.onetime_tasks import (bitcraft_register, bitcraft_quests_task, sell_pink, bridge_usdc_to_arb,
+                                 well3_nft_open, claim_mande_token)
+from selenium_modules.zksync import (era_land_eth, okx_wallet_exchange, mav_exchange,
                           dmail_send_message, odos_exchange, izumi_swap, zero_land_lending,
                           koi_finance, reactor_fusion_lending, pancake_swap, rubyscore, element_market_buy_one_nft)
 import random
@@ -46,7 +46,7 @@ from settings import (
     SAVE_LOGS,
     CHECK_QUESTS_PROGRESS
 )
-from contract_modules.zksync import tevaera_nft_mint
+from modules_settings import tevaera_nft_mint
 
 # 加载 .env 文件
 load_dotenv()
@@ -55,6 +55,7 @@ load_dotenv()
 import os
 import time
 import random
+import inspect
 
 adspower_address = "http://local.adspower.net:50325"
 password = os.environ["password"]
@@ -105,37 +106,68 @@ class AdsPowerChromeDriver:
         service = ChromeService(self.driver_path)
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
         return self.driver
-    
+
+async def run_module(module, wallet_data, option):
+    result = False
+    try:
+        result = await module(wallet_data, option)
+    except Exception as e:
+        logger.error(e)
+        import traceback
+
+        traceback.print_exc()
+
+    await sleep(SLEEP_FROM, SLEEP_TO)
+    return result
+
+
+def _async_run_module(module, wallet_data, option):
+    return asyncio.run(run_module(module, wallet_data, option))
+
 class Executor:
     def __init__(self, task_manager) -> None:
         self.users_list = load_users_list()
         self.task_manager = task_manager
         pass
 
+    def is_selenium_task_type(self, task_func):
+        # 使用inspect.signature()获取函数签名
+        signature = inspect.signature(task_func)
+
+        # 获取函数的参数
+        parameters = signature.parameters
+
+        # 计算参数的数量
+        number_of_parameters = len(parameters)
+        if number_of_parameters == 3:
+            return True # with driver
+        return False
+
     def run_once(self, task_func, user, option, *args, **kwargs):
-        chrome = AdsPowerChromeDriver(user['user_id'])
         result = False
         try:
-            chrome.start()
-            logger.debug(chrome.selemium)
-            logger.debug(chrome.driver_path)
-            driver = chrome.connect()
-            time.sleep(1)
-            clear_windows_and_resize(driver)
-            time.sleep(0.5)
-            result = task_func(driver, user, option)
-            time.sleep(2)
+            if self.is_selenium_task_type(task_func):
+                chrome = AdsPowerChromeDriver(user['user_id'])
+                chrome.start()
+                driver = chrome.connect()
+                time.sleep(1)
+                clear_windows_and_resize(driver)
+                time.sleep(0.5)
+                result = task_func(driver, user, option)
+            else:
+                result = _async_run_module(task_func, user, option)
         except Exception as e:
             logger.error("An error occurred for {} in task {}".format(user['acc_id'], task_func))
             logger.debug(e)
         finally:
-            isManula = kwargs.get('human', False)
-            if not result and isManula:
-                logger.info("wait operations for {} in task {}".format(user['acc_id'], task_func))
-                result = self.wait_for_manually_close(chrome)
-                logger.info("finish operations for {} in task {}".format(user['acc_id'], task_func))
-            else:
-                chrome.close()
+            if self.is_selenium_task_type(task_func):
+                isManula = kwargs.get('human', False)
+                if not result and isManula:
+                    logger.error("wait operations for {} in task {}".format(user['acc_id'], task_func))
+                    result = self.wait_for_manually_close(chrome)
+                    logger.success("finish operations for {} in task {}".format(user['acc_id'], task_func))
+                else:
+                    chrome.close()
         return result
     
     def wait_for_manually_close(self, chrome):
@@ -156,24 +188,6 @@ class Executor:
         users = self.users_list[start_user_index:]
         for user in users:
             self.run_once(task_func, user, option, *args, **kwargs)
-    
-    def sequence_run_tasks_without_driver(self, task_func, option=None, start_user_index=0, *args, **kwargs):
-        users = self.users_list[start_user_index:]
-        for user in users:
-            self.run_once_without_driver(task_func, user, option, *args, **kwargs)
-
-    def run_once_without_driver(self, task_func, user, option, *args, **kwargs):
-        result = False
-        try:
-            result = task_func(None, user, option)
-            time.sleep(2)
-        except Exception as e:
-            logger.error("An error occurred for {} in task {}".format(user['acc_id'], task_func))
-            print(e)
-        finally:
-            logger.info("Wait for a while")
-            time.sleep(180)
-        return result
 
     def batch_run_tasks(self, task_func, option=None, start_user_index=0, max_count=5, *args, **kwargs):
         users = self.users_list[start_user_index:]
@@ -237,47 +251,35 @@ class Executor:
         tasks = self.task_manager.build_task_list(self.users_list, task_func_with_option_list)
         logger.info("Remaining tasks is {}".format(len(tasks)))
 
-async def run_module(module, wallet_data):
-    try:
-        await module(wallet_data)
-    except Exception as e:
-        logger.error(e)
-        import traceback
-
-        traceback.print_exc()
-
-    await sleep(SLEEP_FROM, SLEEP_TO)
-
-
-def _async_run_module(module, wallet_data):
-    asyncio.run(run_module(module, wallet_data))
-
 
 if __name__ == '__main__':
+    logger.remove()
+    logger.add(sys.stderr, level="INFO")
+    if SAVE_LOGS:
+        logger.add('logs.txt')
 
     # users_list = load_users_list()
-
-    # _async_run_module(tevaera_nft_mint, users_list[85])
-
-    # executor = Executor(DailyTaskManager())
-    # executor.sequence_run_tasks(element_market_buy_one_nft, {"password": password}, 90)
-    # executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
+    # _async_run_module(tevaera_nft_mint, users_list[5], {"password": password})
 
     # executor = Executor(DailyTaskManager())
-    # task_func_with_option_list = [(well3_nft_open, {"password": password}, [x for x in range(1, 51)])]
-    # executor.random_run_all_tasks(task_func_with_option_list,max_count=2, retry=2)
+    # executor.sequence_run_tasks(polykemon_point, {"password": password}, 0)
+    # # executor.batch_run_tasks(okx_wallet_import, {"password": password}, 52, 5)
 
     executor = Executor(DailyTaskManager())
-    task_func_with_option_list = [(nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
-                                  (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)])
-                                  ]
-    executor.random_run_all_tasks(task_func_with_option_list)
+    task_func_with_option_list = [(polykemon_point, {"password": password}, [x for x in range(1, 17)])]
+    executor.random_run_all_tasks(task_func_with_option_list, max_count=8, retry=500)
+
+    # executor = Executor(DailyTaskManager())
+    # task_func_with_option_list = [(nfp_daily_check, {"password": password}, [x for x in range(1, 51)]),
+    #                               (ultiverse_daily_explore, {"password": password}, [x for x in range(1, 51)])
+    #                               ]
+    # executor.random_run_all_tasks(task_func_with_option_list)
 
     # once_executor = Executor(OnceTaskManager())
     # zksync_task_function_list = [(era_land_eth, {"password": password}, [x for x in range(1, 101)]),
     #                               (okx_wallet_exchange, {"password": password}, [x for x in range(1, 101)]),
     #                               (mav_exchange, {"password": password}, [x for x in range(1, 101)]),
-    #                             #   (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]), #TODO:直接改成合约交互mint第二个
+    #                               (tevaera_nft_mint, {"password": password}, [x for x in range(1, 101)]),
     #                               (dmail_send_message, {"password": password}, [x for x in range(1, 101)]),
     #                               (odos_exchange, {"password": password}, [x for x in range(1, 101)]),
     #                               (izumi_swap, {"password": password}, [x for x in range(1, 101)]),
@@ -288,5 +290,4 @@ if __name__ == '__main__':
     #                               (rubyscore, {"password": password}, [x for x in range(1, 101)]),
     #                               (element_market_buy_one_nft, {"password": password}, [x for x in range(1, 101)]),
     #                               ]
-    # TODO: 支持两种任务类别 拆分 分别给不同的执行器
     # once_executor.random_run_all_tasks(zksync_task_function_list, max_count=3, retry=1, human=True)
